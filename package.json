@@ -1,0 +1,14 @@
+{
+  "name": "gcijs",
+  "version": "1.0.0",
+  "description": "JavaScript FFI wrapper for the GemStone C Interface (GCI) Library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Foster",
+  "license": "MIT",
+  "dependencies": {
+    "ffi-napi": "^2.4.5"
+  }
+}
