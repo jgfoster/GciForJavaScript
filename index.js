@@ -9,7 +9,13 @@ var FFI = require('ffi-napi');
 class GciLibrary {
     constructor(version) {
         // this needs to handle Linux, macOS, and Windows
-        this.load('libgcits-' + version + '-64.dylib');
+        if (process.platform == "linux") {
+            this.load('libgcits-' + version + '-64.so');
+        } else if (process.platform == "win32") {
+            this.load('libgcits-' + version + '-64.dll');
+        } else if (process.platform == "darwin") {
+            this.load('libgcits-' + version + '-64.dylib');
+        }
     }
 
     load(path) {
