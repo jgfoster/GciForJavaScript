@@ -18,12 +18,16 @@ class GciLibrary {
         }
     }
 
+
     load(path) {
+        const OopType = 'uint64';
         this.library = FFI.Library(path, {
             // Add function definitions here
 
             // uint GciTsVersion(char *buf, size_t bufSize);
             'GciTsVersion': [ 'uint', [ 'string', 'size_t' ] ],
+            // OopType GciTsCharToOop(uint ch);
+            'GciTsCharToOop': [ OopType, ['uint']],
         });
     }
 
@@ -43,12 +47,17 @@ class GciLibrary {
         }
         return string;
     }
+
+    charToOop(ch) {
+        const result = this.library.GciTsCharToOop(ch);
+        return result;
+    }
 }
 
 const gci = new GciLibrary('3.4.3');
 const version = gci.version();
 console.log(version);
-
+console.log('65 -> ', gci.charToOop(65)); // 16668
 
 // var ref = require('ref');
 // var Struct = require('ref-struct');
