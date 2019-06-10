@@ -64,3 +64,4 @@ typings/
 *.dll
 *.dylib
 *.so
+GciLogin.js

@@ -6,6 +6,20 @@
 
 const gci = require("./GciLibrary");
 
+getLogin = () => {
+    const fs = require('fs');
+    fs.access('./GciLogin.js', fs.F_OK, (err) => {
+    if (err) {
+        fs.copyFile('./GciDefault.js', './GciLogin.js', (err) => {
+        if (err) throw err;
+        });
+    }
+    });
+    const login = require("./GciLogin");
+}
+
+getLogin();
+
 test('GciTsCharToOop', () => {
     expect(gci.GciTsCharToOop("A".charCodeAt(0))).toBe(16668);
     expect(gci.GciTsCharToOop(1114111)).toBe(285212444);
