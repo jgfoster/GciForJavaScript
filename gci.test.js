@@ -4,7 +4,8 @@
  *  Based on https://jestjs.io/docs/en/getting-started
  */
 
-const gci = require("./GciLibrary");
+const { gci, GciErrSType } = require("./GciLibrary");
+
 
 getLogin = () => {
     const fs = require('fs');
@@ -15,10 +16,14 @@ getLogin = () => {
         });
     }
     });
-    const login = require("./GciLogin");
+    return require("./GciLogin");
 }
 
-getLogin();
+const login = getLogin();
+
+test('Login info', () => {
+    expect(login.gs_user === 'DataCurator');
+})
 
 test('GciTsCharToOop', () => {
     expect(gci.GciTsCharToOop("A".charCodeAt(0))).toBe(16668);
@@ -59,3 +64,30 @@ test('GciTsVersion', () => {
     expect(theString).toBe('3.4.3 build gss64_3_4_x_branch-45183');
   });
   
+test('GciTsLogin', () => {
+    error = new GciErrSType();
+    const session = gci.GciTsLogin(
+        '', // const char *StoneNameNrs
+        '', // const char *HostUserId
+        '', // const char *HostPassword
+        false, // BoolType hostPwIsEncrypted
+        '', // const char *GemServiceNrs
+        '', // const char *gemstoneUsername
+        '', // const char *gemstonePassword
+        '', // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
+        0, // int haltOnErrNum
+        error.ref() // GciErrSType *err
+    );
+    expect(session).toBe(0);
+    expect(error.number).toBe(4147);
+    expect(error.category).toBe(231169);
+    expect(error.context).toBe(0);
+    expect(error.exception).toBe(0);
+    expect(error.argCount).toBe(0);
+    expect(error.fatal).toBe(1);
+    const message = Buffer.from(error.message).toString('utf8').split('\0').shift();
+    var expected = 'linkable login (gcilnkobj) not supported in GciTs library';
+    expect(message).toBe(expected);
+    const reason = Buffer.from(error.reason).toString('utf8').split('\0').shift();
+    expect(reason).toBe('');
+})
