@@ -4,7 +4,7 @@
   "description": "JavaScript FFI wrapper for the GemStone C Interface (GCI) Library",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "author": "James Foster",
   "license": "MIT",
