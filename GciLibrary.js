@@ -30,7 +30,9 @@ const GciErrSType = Struct({        // gci.ht
 });
 
 // uint GciTsVersion(char *buf, size_t bufSize);
-const gci = FFI.Library('libgcits-3.4.3-64.dylib', {
+// const path = '/pitcairn1/users/jfoster/checkouts/trunk/slow42/gs/product/lib/libgcits-3.5.0-64.dylib';
+const path = 'libgcits-3.4.3-64.dylib';
+const gci = FFI.Library(path, {
     'GciI32ToOop': [ OopType, [ 'int'] ], 
     'GciTsCharToOop': [ OopType, [ 'uint' ] ],
     'GciTsDoubleToSmallDouble': [ OopType, [ 'double'] ], 
@@ -49,7 +51,7 @@ const gci = FFI.Library('libgcits-3.4.3-64.dylib', {
     'GciTsLogout': [ 'bool', [ GciSession, ref.refType(GciErrSType) ] ],
     'GciTsOopIsSpecial': [ 'bool', [ OopType ] ],
     'GciTsOopToChar': [ 'int', [ OopType ] ],
-    'GciTsSessionIsRemote': [ 'bool', [ GciSession ] ],
+    'GciTsSessionIsRemote': [ 'int', [ GciSession ] ],
     'GciTsVersion': [ 'uint', [ 'string', 'size_t' ] ],
 });
 
