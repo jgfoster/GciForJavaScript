@@ -14,6 +14,8 @@ const GCI_MAX_ERR_ARGS = 10;
 const OOP_ILLEGAL = 1;
 const OOP_NIL = 20;
 
+const GciSession = ref.types.int;
+const OopType = ref.types.uint64;
 const GciErrSType = Struct({        // gci.ht 
     category:   OopType,    // error dictionary
     context:    OopType,    // GemStone Smalltalk execution state , a GsProcess
@@ -26,11 +28,10 @@ const GciErrSType = Struct({        // gci.ht
     message:    ArrayType('char', GCI_ERR_STR_SIZE + 1),     // null-terminated Utf8
     reason:     ArrayType('char', GCI_ERR_reasonSize + 1)    // null-terminated Utf8
 });
-const GciSession = ref.types.int;
-const OopType = ref.types.uint64;
 
 // uint GciTsVersion(char *buf, size_t bufSize);
-const gci = FFI.Library('libgcits-3.4.3-64.dylib', {
+const path = '/pitcairn1/users/jfoster/checkouts/trunk/slow42/gs/product/lib/libgcits-3.5.0-64.dylib';
+const gci = FFI.Library(path, {
     'GciI32ToOop': [ OopType, [ 'int'] ], 
     'GciTsCharToOop': [ OopType, [ 'uint' ] ],
     'GciTsDoubleToSmallDouble': [ OopType, [ 'double'] ], 

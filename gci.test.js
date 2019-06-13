@@ -6,7 +6,6 @@
 
 const { gci, GciErrSType } = require("./GciLibrary");
 
-
 getLogin = () => {
     const fs = require('fs');
     fs.access('./GciLogin.js', fs.F_OK, (err) => {
@@ -41,11 +40,19 @@ test('gci.GciI32ToOop', () => {
     expect(gci.GciI32ToOop(55)).toBe(442); 
 })
 
-// test('GciTsOopIsSpecial', () => {
-//     expect(gci.GciTsOopIsSpecial(1)).toBe(true);    // OOP_ILLEGAL
-//     expect(gci.GciTsOopIsSpecial(20)).toBe(true);    // OOP_NIL
-//     expect(gci.GciTsOopIsSpecial(16668)).toBe(true);
-// })
+function wait(ms){
+    var start = new Date().getTime();
+    var end = start;
+    while(end < (start + ms)) {
+      end = new Date().getTime();
+   }
+ }
+wait(30000); 
+test('GciTsOopIsSpecial', () => {
+    // expect(gci.GciTsOopIsSpecial(1)).toBe(true);    // OOP_ILLEGAL
+    expect(gci.GciTsOopIsSpecial(20)).toBe(true);    // OOP_NIL
+    // expect(gci.GciTsOopIsSpecial(16668)).toBe(true);
+})
 
 test('GciTsOopToChar', () => {
     expect(gci.GciTsOopToChar(16668)).toBe("A".charCodeAt(0));
@@ -61,7 +68,7 @@ test('GciTsVersion', () => {
     const terminatingNullPos = theString.indexOf('\u0000');
     if (terminatingNullPos >= 0) {theString = theString.substr(0, terminatingNullPos);}
     expect(result).toBe(3);
-    expect(theString).toBe('3.4.3 build gss64_3_4_x_branch-45183');
+    expect(theString).toBe('3.5.0 build 64bit-46249PRIVATE');
   });
   
 test('GciTsLogin', () => {
