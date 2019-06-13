@@ -8,6 +8,7 @@
  */
 
 module.exports = {
+    library: 'libgcits-3.4.3-64.dylib',
     gem_host: 'localhost',
     stone: 'gs64stone',
     gs_user: 'DataCurator',

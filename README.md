@@ -27,8 +27,8 @@ This checkout has only one code file, index.js. This is strictly a proof-of-conc
 To add new function wrappers follow these steps:
 
 * Identify a new function from `gcits.hf` (pick from the list below);
-* Add it to GciLibrary.load() with the appropriate name, arguments, and return type;
-* Add a wrapper function to GciLibrary to provide a JavaScript-like API; 
+* Add it to GciLibrary with the appropriate name, arguments, and return type;
+* Add a wrapper function to GciSession to provide a JavaScript-like API; 
 * Add a test to show that it works; and, finally,
 * Submit a pull request!
 
@@ -44,10 +44,10 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 2	BoolType   GciTsBegin(GciSession sess, GciErrSType *err);
 2	BoolType   GciTsCommit(GciSession sess, GciErrSType *err);
 	char*      GciTsEncrypt(const char* password, char *outBuf, size_t outBuffSize);
-1	int        GciTsSessionIsRemote(GciSession sess);
-1	GciSession GciTsLogin(
+✓	int        GciTsSessionIsRemote(GciSession sess);
+✓	GciSession GciTsLogin(
 	BoolType   GciTsForkLogin(
-1	BoolType   GciTsLogout(GciSession sess, GciErrSType *err);
+✓	BoolType   GciTsLogout(GciSession sess, GciErrSType *err);
 ```
 
 ### Table 7.2 Functions for Handling Errors and Interrupts and for Debugging
@@ -105,14 +105,14 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ### Table 7.7 Functions for Converting Objects and Values
 ```
-1	BoolType   GciTsOopIsSpecial(OopType oop);
+✓	BoolType   GciTsOopIsSpecial(OopType oop);
 3	OopType    GciTsFetchSpecialClass(OopType oop);
-1	int        GciTsOopToChar(OopType oop);
-1	OopType    GciTsCharToOop(uint ch);
-1	OopType    GciTsDoubleToSmallDouble(double aFloat);
+✓	int        GciTsOopToChar(OopType oop);
+✓	OopType    GciTsCharToOop(uint ch);
+✓	OopType    GciTsDoubleToSmallDouble(double aFloat);
 	BoolType   GciUtf8To8bit(const char* src, char *dest, ssize_t destSize);
 	ssize_t    GciNextUtf8Character(const char* src, size_t len, uint *chOut);
-1	OopType    GciI32ToOop(int arg);
+✓	OopType    GciI32ToOop(int arg);
 	OopType    GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err);
 	BoolType   GciTsOopToDouble(GciSession sess, OopType oop,
 	OopType    GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err);
