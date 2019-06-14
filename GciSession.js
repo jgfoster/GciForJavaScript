@@ -169,6 +169,19 @@ class GciSession {
         }
     }
 
+    version() {
+        const maxStringLength = 200;
+        const theStringBuffer = Buffer.alloc(maxStringLength);
+        const result = this.gci.GciTsVersion(theStringBuffer, maxStringLength);
+        var theString = theStringBuffer.toString('utf-8');
+        const terminatingNullPos = theString.indexOf('\u0000');
+        if (terminatingNullPos >= 0) {theString = theString.substr(0, terminatingNullPos);}
+        if (result !== 3) {
+            throw new Error('GciTsVersion() returned ' + result.toString());
+        }
+        return theString;
+    }
+
     trace(level) {
         const flag = this.gci.GciTsGemTrace(this.session, level, this.error.ref());
         if (flag === -1) {

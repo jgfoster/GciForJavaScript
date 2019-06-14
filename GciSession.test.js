@@ -249,3 +249,8 @@ test('logout', () => {
     }
     expect(error.message).toBe('argument is not a valid GciSession pointer');
 })
+
+test('version', () => {
+    const version = session.version();
+    expect(version).toBe('3.4.3 build gss64_3_4_x_branch-45183');
+})

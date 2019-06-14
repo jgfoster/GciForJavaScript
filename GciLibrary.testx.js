@@ -100,7 +100,6 @@ test('GciTsVersion', () => {
     expect(result).toBe(3);
     // expect(theString).toBe('3.5.0 build 64bit-46249PRIVATE');
     expect(theString).toBe('3.4.3 build gss64_3_4_x_branch-45183');
-    
   });
 
 test('GciTsLogin', () => {
