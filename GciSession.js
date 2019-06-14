@@ -4,7 +4,7 @@
  *  GciSession provides a wrapper around GciLibrary
  */
 
-const { GciLibrary, GciErrSType } = require("./GciLibrary");
+const { GciLibrary, GciErrSType, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING } = require("./GciLibrary");
 
 getLogin = () => {
     const fs = require('fs');
@@ -60,6 +60,39 @@ class GciSession {
         }
     }
 
+    // 'GciTsExecute': [ OopType, [ GciSessionType, 'string', OopType, OopType, OopType, 'int', 'uint16', ref.refType(GciErrSType) ] ],
+    execute(string) {
+        const oop = this.gci.GciTsExecute(this.session, string, OOP_CLASS_STRING, OOP_ILLEGAL, OOP_NIL, 0, 0, this.error.ref());
+        if (oop === OOP_ILLEGAL) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return oop;
+    }
+
+    fetchClass(oop) {
+        const classOop = this.gci.GciTsFetchClass(this.session, oop, this.error.ref());
+        if (classOop === OOP_ILLEGAL) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return classOop;
+    }
+
+    fetchSize(oop) {
+        const size = this.gci.GciTsFetchSize(this.session, oop, this.error.ref());
+        if (size === -1) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return size;
+    }
+
+    fetchVaryingSize(oop) {
+        const size = this.gci.GciTsFetchVaryingSize(this.session, oop, this.error.ref());
+        if (size === -1) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return size;
+    }
+
     hardBreak() {
         if (!this.gci.GciTsBreak(this.session, true, this.error.ref())) {
             throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
@@ -74,6 +107,14 @@ class GciSession {
         return flag === 1;
     }
 
+    isKindOf(objectOop, classOop) {
+        const flag = this.gci.GciTsIsKindOf(this.session, objectOop, classOop, this.error.ref());
+        if (flag === -1) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return flag === 1;
+    }
+
     logout() {
         if (!this.gci.GciTsLogout(this.session, this.error.ref())) {
             throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
@@ -81,10 +122,26 @@ class GciSession {
         this.session = 0;
     }
 
+    resolveSymbol(string, symbolList = OOP_NIL) {
+        const oop = this.gci.GciTsResolveSymbol(this.session, string, symbolList, this.error.ref());
+        if (oop === OOP_ILLEGAL) {
+            throw new Error('Symbol not found!');
+        }
+        return oop;
+    }
+
     softBreak() {
         if (!this.gci.GciTsBreak(this.session, false, this.error.ref())) {
             throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
         }
+    }
+
+    trace(level) {
+        const flag = this.gci.GciTsGemTrace(this.session, level, this.error.ref());
+        if (flag === -1) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return flag;
     }
 }
 

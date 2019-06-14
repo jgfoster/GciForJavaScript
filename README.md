@@ -57,7 +57,7 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 	BoolType   GciTsClearStack(GciSession sess, OopType gsProcess, GciErrSType *err);
 	OopType    GciTsContinueWith(GciSession sess,
 	BoolType   GciTsForkContinueWith(GciSession sess,
-	int        GciTsGemTrace(GciSession sess, int enable, GciErrSType *err);
+✓	int        GciTsGemTrace(GciSession sess, int enable, GciErrSType *err);
 ```
 
 ### Table 7.3 Functions for Managing Object Bitmaps
@@ -72,7 +72,7 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 	OopType    GciTsCompileMethod(GciSession sess,
 	BoolType   GciTsProtectMethods(GciSession sess, BoolType mode, GciErrSType *err);
 	BoolType   GciTsClassRemoveAllMethods(GciSession sess, 
-4	OopType    GciTsExecute(GciSession sess,
+✓	OopType    GciTsExecute(GciSession sess,
 	BoolType   GciTsForkExecute(GciSession sess,
 	OopType    GciTsExecute_(GciSession sess,
 4	ssize_t    GciTsExecuteFetchBytes(GciSession sess,
@@ -83,7 +83,7 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ### Table 7.5 Functions for Accessing Symbol Dictionaries
 ```
-3	OopType    GciTsResolveSymbol(GciSession sess, 
+✓	OopType    GciTsResolveSymbol(GciSession sess, 
 	OopType    GciTsResolveSymbolObj(GciSession sess, 
 ```
 
@@ -106,7 +106,7 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ### Table 7.7 Functions for Converting Objects and Values
 ```
 ✓	BoolType   GciTsOopIsSpecial(OopType oop);
-3	OopType    GciTsFetchSpecialClass(OopType oop);
+	OopType    GciTsFetchSpecialClass(OopType oop);
 ✓	int        GciTsOopToChar(OopType oop);
 ✓	OopType    GciTsCharToOop(uint ch);
 ✓	OopType    GciTsDoubleToSmallDouble(double aFloat);
@@ -138,10 +138,10 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 	BoolType   GciTsStoreOops(GciSession sess,
 	int        GciTsRemoveOopsFromNsc(GciSession sess, 
 	int64      GciTsFetchObjInfo(GciSession sess, OopType objId, 
-3	int64      GciTsFetchSize(GciSession sess, OopType obj, GciErrSType *err);
-3	int64      GciTsFetchVaryingSize(GciSession sess, OopType obj, GciErrSType *err);
-3	OopType    GciTsFetchClass(GciSession sess, OopType obj, GciErrSType *err);
-3	int        GciTsIsKindOf(GciSession sess, 
+✓	int64      GciTsFetchSize(GciSession sess, OopType obj, GciErrSType *err);
+✓	int64      GciTsFetchVaryingSize(GciSession sess, OopType obj, GciErrSType *err);
+✓	OopType    GciTsFetchClass(GciSession sess, OopType obj, GciErrSType *err);
+✓	int        GciTsIsKindOf(GciSession sess, 
 3	int        GciTsIsSubclassOf(GciSession sess, 
 3	int        GciTsIsKindOfClass(GciSession sess, 
 	int        GciTsIsSubclassOfClass(GciSession sess, 
