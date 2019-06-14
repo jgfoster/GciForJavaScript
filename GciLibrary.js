@@ -29,13 +29,6 @@ const GciErrSType = Struct({       // gci.ht
     message:    ArrayType('char', GCI_ERR_STR_SIZE + 1),     // null-terminated Utf8
     reason:     ArrayType('char', GCI_ERR_reasonSize + 1)    // null-terminated Utf8
 });
-/* EXTERN_GCI_DEC(OopType) GciTsExecute(GciSession sess,
-    const char* sourceStr, OopType sourceOop,
-    OopType contextObject, OopType symbolList,
-    int flags, // per GCI_PERFORM_FLAG* in gcicmn.ht
-    ushort environmentId, // normally 0
-    GciErrSType *err);
-*/
 
 GciLibrary = (path) => {
     return FFI.Library(path, {
@@ -48,6 +41,8 @@ GciLibrary = (path) => {
         'GciTsCharToOop'            : [ OopType,    [ 'uint' ] ],
         'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double'] ], 
         'GciTsExecute'              : [ OopType,    [ GciSessionType, 'string', OopType, OopType, OopType, 'int', 'uint16', ref.refType(GciErrSType) ] ],
+        'GciTsExecute_'             : [ OopType,    [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'int', 'uint16', ref.refType(GciErrSType) ] ],
+        'GciTsExecuteFetchBytes'    : [ 'int',      [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'pointer', 'uint16', ref.refType(GciErrSType) ] ],
         'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, ref.refType(GciErrSType) ] ],
         'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, ref.refType(GciErrSType) ] ],
         'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, ref.refType(GciErrSType) ] ],
@@ -68,6 +63,8 @@ GciLibrary = (path) => {
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, ref.refType(GciErrSType) ] ],
         'GciTsOopIsSpecial'         : [ 'bool',     [ OopType ] ],
         'GciTsOopToChar'            : [ 'int',      [ OopType ] ],
+        'GciTsPerform'              : [ OopType,    [ GciSessionType, OopType, OopType, 'string', ArrayType(OopType), 'int', 'int', 'uint16', ref.refType(GciErrSType) ] ],
+        'GciTsPerformFetchBytes'    : [ OopType,    [ GciSessionType, OopType, 'string', ArrayType(OopType), 'int', 'pointer', 'uint16', ref.refType(GciErrSType) ] ],
         'GciTsResolveSymbol'        : [ OopType,    [ OopType, 'string', OopType, ref.refType(GciErrSType) ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],

@@ -60,13 +60,23 @@ class GciSession {
         }
     }
 
-    // 'GciTsExecute': [ OopType, [ GciSessionType, 'string', OopType, OopType, OopType, 'int', 'uint16', ref.refType(GciErrSType) ] ],
     execute(string) {
-        const oop = this.gci.GciTsExecute(this.session, string, OOP_CLASS_STRING, OOP_ILLEGAL, OOP_NIL, 0, 0, this.error.ref());
+        const oop = this.gci.GciTsExecute_(this.session, string, string.length, OOP_CLASS_STRING, 
+            OOP_ILLEGAL, OOP_NIL, 0, 0, this.error.ref());
         if (oop === OOP_ILLEGAL) {
             throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
         }
         return oop;
+    }
+
+    executeFetchBytes(string, expectedSize) {
+        const buffer = Buffer.alloc(expectedSize);
+        const actualSize = this.gci.GciTsExecuteFetchBytes(this.session, string, string.length, OOP_CLASS_STRING, 
+            OOP_ILLEGAL, OOP_NIL, buffer, buffer.length, this.error.ref());
+        if (actualSize === -1) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return buffer.toString('utf8', 0, actualSize);
     }
 
     fetchClass(oop) {
@@ -120,6 +130,29 @@ class GciSession {
             throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
         }
         this.session = 0;
+    }
+
+    perform(receiver, selector, oopArray) {
+        const oop = this.gci.GciTsPerform(this.session, receiver, OOP_ILLEGAL, selector, oopArray, 
+            oopArray.length, 0, 0, this.error.ref());
+        if (oop === OOP_ILLEGAL) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        return oop;
+    }
+
+    performFetchBytes(receiver, selector, oopArray, expectedSize) {
+        const buffer = Buffer.alloc(expectedSize + 10);
+        const actualSize = this.gci.GciTsPerformFetchBytes(this.session, receiver, selector, 
+            oopArray, oopArray.length, buffer, buffer.length, this.error.ref());
+        if (actualSize === -1) {
+            throw new Error(Buffer.from(this.error.message).toString('utf8').split('\0').shift());
+        }
+        if (actualSize > expectedSize) {
+            throw new Error('Actual size of ' + actualSize.toString() + 
+                ' exceeded buffer size of ' + expectedSize.toString());
+        }
+        return buffer.toString('utf8', 0, actualSize);
     }
 
     resolveSymbol(string, symbolList = OOP_NIL) {

@@ -74,11 +74,11 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 	BoolType   GciTsClassRemoveAllMethods(GciSession sess, 
 ✓	OopType    GciTsExecute(GciSession sess,
 	BoolType   GciTsForkExecute(GciSession sess,
-	OopType    GciTsExecute_(GciSession sess,
-4	ssize_t    GciTsExecuteFetchBytes(GciSession sess,
-4	OopType    GciTsPerform(GciSession sess,
+✓	OopType    GciTsExecute_(GciSession sess,
+✓	ssize_t    GciTsExecuteFetchBytes(GciSession sess,
+✓	OopType    GciTsPerform(GciSession sess,
 	BoolType   GciTsForkPerform(GciSession sess,
-4	ssize_t    GciTsPerformFetchBytes(GciSession sess,
+✓	ssize_t    GciTsPerformFetchBytes(GciSession sess,
 ```
 
 ### Table 7.5 Functions for Accessing Symbol Dictionaries
@@ -142,10 +142,10 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ✓	int64      GciTsFetchVaryingSize(GciSession sess, OopType obj, GciErrSType *err);
 ✓	OopType    GciTsFetchClass(GciSession sess, OopType obj, GciErrSType *err);
 ✓	int        GciTsIsKindOf(GciSession sess, 
-3	int        GciTsIsSubclassOf(GciSession sess, 
-3	int        GciTsIsKindOfClass(GciSession sess, 
+	int        GciTsIsSubclassOf(GciSession sess, 
+	int        GciTsIsKindOfClass(GciSession sess, 
 	int        GciTsIsSubclassOfClass(GciSession sess, 
-3	BoolType   GciTsObjExists(GciSession sess, OopType obj);
+	BoolType   GciTsObjExists(GciSession sess, OopType obj);
 ```
 
 ### Table 7.10 Utility Functions

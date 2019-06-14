@@ -191,6 +191,45 @@ test('execute', () => {
     expect(oop2).toBe(42);
 })
 
+test('executeFetchBytes', () => {
+    var error, string;
+    try {
+        string = session.executeFetchBytes("'Hello World!'", 16);
+    } catch (e) {
+        error = e;
+    }
+    expect(error).toBe(undefined);
+    expect(string).toBe('Hello World!');
+})
+
+test('perform', () => {
+    var error, oop1, oop2;
+    try {
+        oop1 = session.perform(globals, 'yourself', []);
+        oop2 = session.perform(18, '+', [26]);  // 2 + 3
+    } catch (e) {
+        error = e;
+    }
+    expect(error).toBe(undefined);
+    expect(oop1).toBe(globals);
+    expect(oop2).toBe(42);      // 5
+})
+
+test('performFetchBytes', () => {
+    var error, string1, string2, string3;
+    try {
+        string1 = session.performFetchBytes(42, 'printString', [], 8);
+        string2 = session.performFetchBytes(arrayClass, 'printString', [], 6);
+        string3 = session.performFetchBytes(arrayClass, 'printString', [], 4);
+    } catch (e) {
+        error = e;
+    }
+    expect(string1).toBe('5');
+    expect(string2).toBe('Array');
+    expect(string3).toBe(undefined);
+    expect(error.message).toBe('Actual size of 5 exceeded buffer size of 4');
+})
+
 test('logout', () => {
     var error;
     try {
