@@ -32,6 +32,11 @@ const GciErrSType = Struct({       // gci.ht
 GciLibrary = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType, [ 'int'] ], 
+        'GciTsAbort'                : [ 'bool', [ GciSessionType, ref.refType(GciErrSType) ] ],
+        'GciTsBegin'                : [ 'bool', [ GciSessionType, ref.refType(GciErrSType) ] ],
+        'GciTsBreak'                : [ 'bool', [ GciSessionType, 'bool', ref.refType(GciErrSType) ] ],
+        'GciTsCommit'               : [ 'bool', [ GciSessionType, ref.refType(GciErrSType) ] ],
+        'GciTsCallInProgress'       : [ 'int',  [ GciSessionType, ref.refType(GciErrSType) ] ],
         'GciTsCharToOop'            : [ OopType, [ 'uint' ] ],
         'GciTsDoubleToSmallDouble'  : [ OopType, [ 'double'] ], 
         'GciTsLogin'                : [ GciSessionType, [ 

@@ -40,9 +40,9 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ### Table 7.1 Functions for Controlling Sessions and Transactions
 ```
-2	BoolType   GciTsAbort(GciSession sess, GciErrSType *err);
-2	BoolType   GciTsBegin(GciSession sess, GciErrSType *err);
-2	BoolType   GciTsCommit(GciSession sess, GciErrSType *err);
+✓	BoolType   GciTsAbort(GciSession sess, GciErrSType *err);
+✓	BoolType   GciTsBegin(GciSession sess, GciErrSType *err);
+✓	BoolType   GciTsCommit(GciSession sess, GciErrSType *err);
 	char*      GciTsEncrypt(const char* password, char *outBuf, size_t outBuffSize);
 ✓	int        GciTsSessionIsRemote(GciSession sess);
 ✓	GciSession GciTsLogin(
@@ -52,8 +52,8 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ### Table 7.2 Functions for Handling Errors and Interrupts and for Debugging
 ```
-2	BoolType   GciTsBreak(GciSession sess, BoolType hard, GciErrSType *err);
-2	int        GciTsCallInProgress(GciSession sess, GciErrSType *err);
+✓	BoolType   GciTsBreak(GciSession sess, BoolType hard, GciErrSType *err);
+✓	int        GciTsCallInProgress(GciSession sess, GciErrSType *err);
 	BoolType   GciTsClearStack(GciSession sess, OopType gsProcess, GciErrSType *err);
 	OopType    GciTsContinueWith(GciSession sess,
 	BoolType   GciTsForkContinueWith(GciSession sess,
