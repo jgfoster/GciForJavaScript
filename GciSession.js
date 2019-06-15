@@ -6,36 +6,23 @@
 
 const { GciLibrary, GciErrSType, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING } = require("./GciLibrary");
 
-getLogin = () => {
-    const fs = require('fs');
-    fs.access('./GciLogin.js', fs.F_OK, (err) => {
-    if (err) {
-        fs.copyFile('./GciDefault.js', './GciLogin.js', (err) => {
-        if (err) throw err;
-        });
-    }
-    });
-    return require("./GciLogin");
-}
-const login = getLogin();
-
 class GciSession {
-    constructor(user = login.gs_user, password = login.gs_password, library = login.library) {
-        this.gci = GciLibrary(library);
+    constructor(login) {
+        this.gci = GciLibrary(login.library);
         this.error = new GciErrSType();
         const stoneNRS = '!tcp@localhost#server!' + login.stone;
         const gemNRS = '!tcp@' + login.gem_host + '#netldi:' + login.netldi + '#task!gemnetobject';
         this.session = this.gci.GciTsLogin(
-            stoneNRS, // const char *StoneNameNrs
-            null, // const char *HostUserId
-            null, // const char *HostPassword
-            false, // BoolType hostPwIsEncrypted
-            gemNRS, // const char *GemServiceNrs
-            user, // const char *gemstoneUsername
-            password, // const char *gemstonePassword
-            0, // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
-            0, // int haltOnErrNum
-            this.error.ref() // GciErrSType *err
+            stoneNRS,               // const char *StoneNameNrs
+            login.host_user,        // const char *HostUserId
+            login.host_password,    // const char *HostPassword
+            false,                  // BoolType hostPwIsEncrypted
+            gemNRS,                 // const char *GemServiceNrs
+            login.gs_user,          // const char *gemstoneUsername
+            login.gs_password,      // const char *gemstonePassword
+            0,                      // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
+            0,                      // int haltOnErrNum
+            this.error.ref()        // GciErrSType *err
         );
         if (this.session === 0) {
             throw new Error(this.error.message());

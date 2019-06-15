@@ -6,10 +6,23 @@ const { GciSession } = require("./GciSession");
 var session;
 var nil, arrayClass, globals, objectClass, symbolDictionaryClass;
 
+getLogin = () => {
+    const fs = require('fs');
+    fs.access('./GciLogin.js', fs.F_OK, (err) => {
+    if (err) {
+        fs.copyFile('./GciDefault.js', './GciLogin.js', (err) => {
+        if (err) throw err;
+        });
+    }
+    });
+    return require("./GciLogin");
+}
+const login = getLogin();
+
 test('bad user', () => {
     var error;
     try {
-        session = new GciSession('no such user');
+        session = new GciSession({...login, gs_user: 'no such user'});
     } catch (e) {
         error = e;
     }
@@ -20,7 +33,7 @@ test('bad user', () => {
 test('login', () => {
     var error;
     try {
-        session = new GciSession();
+        session = new GciSession(login);
     } catch (e) {
         error = e;
     }
