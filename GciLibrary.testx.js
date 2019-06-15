@@ -35,7 +35,7 @@ var session = null;
 
 // Login attempt needed to initialize library (http://kermit.gemtalksystems.com/bug?bug=48091)
 test('GciTsLogin with nulls', () => {
-    error = new GciErrSType();
+    const error = new GciErrSType();
     session = gci.GciTsLogin(
         null, // const char *StoneNameNrs
         null, // const char *HostUserId
@@ -49,17 +49,14 @@ test('GciTsLogin with nulls', () => {
         error.ref() // GciErrSType *err
     );
     expect(session).toBe(0);
-    expect(error.number).toBe(4051);
-    expect(error.category).toBe(231169);
-    expect(error.context).toBe(0);
-    expect(error.exception).toBe(0);
-    expect(error.argCount).toBe(0);
-    expect(error.fatal).toBe(1);
-    const message = Buffer.from(error.message).toString('utf8').split('\0').shift();
-    var expected = 'gemstoneUsername is NULL or empty';
-    expect(message).toBe(expected);
-    const reason = Buffer.from(error.reason).toString('utf8').split('\0').shift();
-    expect(reason).toBe('');
+    expect(error.number()).toBe(4051);
+    expect(error.category()).toBe(231169);
+    expect(error.context()).toBe(0);
+    expect(error.exception()).toBe(0);
+    expect(error.argCount()).toBe(0);
+    expect(error.fatal()).toBe(1);
+    expect(error.message()).toBe('gemstoneUsername is NULL or empty');
+    expect(error.reason()).toBe('');
 });
 
 test('GciTsCharToOop', () => {
@@ -103,7 +100,7 @@ test('GciTsVersion', () => {
   });
 
 test('GciTsLogin', () => {
-    error = new GciErrSType();
+    const error = new GciErrSType();
     stoneNRS = '!tcp@localhost#server!' + login.stone;
     gemNRS = '!tcp@' + login.gem_host + '#netldi:' + login.netldi + '#task!gemnetobject';
     session = gci.GciTsLogin(
@@ -119,17 +116,14 @@ test('GciTsLogin', () => {
         error.ref() // GciErrSType *err
     );
     expect(session === 0).toBe(false);
-    expect(error.number).toBe(0);
-    expect(error.category).toBe(0);
-    expect(error.context).toBe(0);
-    expect(error.exception).toBe(0);
-    expect(error.argCount).toBe(0);
-    expect(error.fatal).toBe(0);
-    const message = Buffer.from(error.message).toString('utf8').split('\0').shift();
-    var expected = '';
-    expect(message).toBe(expected);
-    const reason = Buffer.from(error.reason).toString('utf8').split('\0').shift();
-    expect(reason).toBe('');
+    expect(error.number()).toBe(0);
+    expect(error.category()).toBe(0);
+    expect(error.context()).toBe(0);
+    expect(error.exception()).toBe(0);
+    expect(error.argCount()).toBe(0);
+    expect(error.fatal()).toBe(0);
+    expect(error.message()).toBe('');
+    expect(error.reason()).toBe('');
 });
 
 test('GciTsSessionIsRemote', () => {
@@ -137,20 +131,17 @@ test('GciTsSessionIsRemote', () => {
 })
 
 test('GciTsLogout', () => {
-    error = new GciErrSType();
+    const error = new GciErrSType();
     expect(session === 0).toBe(false);
     expect(gci.GciTsLogout(session, error.ref()));
-    expect(error.number).toBe(0);
+    expect(error.number() ).toBe(0);
     expect(!gci.GciTsLogout(session, error.ref()));
-    expect(error.number).toBe(4100);
-    expect(error.category).toBe(231169);
-    expect(error.context).toBe(0);
-    expect(error.exception).toBe(0);
-    expect(error.argCount).toBe(0);
-    expect(error.fatal).toBe(0);
-    const message = Buffer.from(error.message).toString('utf8').split('\0').shift();
-    var expected = 'argument is not a valid GciSession pointer';
-    expect(message).toBe(expected);
-    const reason = Buffer.from(error.reason).toString('utf8').split('\0').shift();
-    expect(reason).toBe('');
+    expect(error.number()).toBe(4100);
+    expect(error.category()).toBe(231169);
+    expect(error.context()).toBe(0);
+    expect(error.exception()).toBe(0);
+    expect(error.argCount()).toBe(0);
+    expect(error.fatal()).toBe(0);
+    expect(error.message()).toBe('argument is not a valid GciSession pointer');
+    expect(error.reason()).toBe('');
 });

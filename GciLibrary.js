@@ -3,51 +3,46 @@
  */
 
 const FFI = require('ffi-napi');
-const ref = require('ref');
-const ArrayType = require('ref-array');
-const Struct = require('ref-struct');
 
-const GCI_ERR_STR_SIZE = 1024;
-const GCI_ERR_reasonSize = GCI_ERR_STR_SIZE;
-const GCI_MAX_ERR_ARGS = 10;
 const OOP_ILLEGAL = 1;
 const OOP_NIL = 20;
 const OOP_CLASS_STRING = 74753;
 
-const GciSessionType = ref.types.int64;     // int is 32-bits in node, but 64-bits in GemStone?
-const OopType = ref.types.uint64;
+const GciSessionType = 'int64';
+const OopType = 'int64';
 
-const GciErrSType = Struct({       // gci.ht 
-    category:   OopType,    // error dictionary
-    context:    OopType,    // GemStone Smalltalk execution state , a GsProcess
-    exception:  OopType,    // an instance of AbstractException, or nil; 
-                            // nil if error was not signaled from Smalltalk execution
-    args:       ArrayType(OopType, GCI_MAX_ERR_ARGS),  // arguments to error text
-    number:     'int',      // GemStone error number
-    argCount:   'int',      // num of arg in the args[]
-    fatal:      'uchar',    // nonzero if err is fatal 
-    message:    ArrayType('char', GCI_ERR_STR_SIZE + 1),     // null-terminated Utf8
-    reason:     ArrayType('char', GCI_ERR_reasonSize + 1)    // null-terminated Utf8
-});
+class GciErrSType {       // gci.ht 
+    constructor() { this.buffer = Buffer.alloc(2200);   }   // 2163 plus some padding
+    ref()       { return this.buffer;                   }
+    category()  { return this.buffer.readIntLE(  0, 6); }   // size is actually 8 bytes, but Buffer only supports 6 bytes before Node.js v12.0.0
+    context()   { return this.buffer.readIntLE(  8, 6); }
+    exception() { return this.buffer.readIntLE( 16, 6); }
+    // args() an array of 10 OopType values
+    number()    { return this.buffer.readIntLE(104, 4); }
+    argCount()  { return this.buffer.readIntLE(108, 4); }
+    fatal()     { return this.buffer.readIntLE(112, 1); }
+    message()   { return this.buffer.toString('utf8',  113, 1025).split('\0').shift() }
+    reason()    { return this.buffer.toString('utf8', 1138, 1025).split('\0').shift() }
+}
 
 GciLibrary = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType,    [ 'int'] ], 
-        'GciTsAbort'                : [ 'bool',     [ GciSessionType, ref.refType(GciErrSType) ] ],
-        'GciTsBegin'                : [ 'bool',     [ GciSessionType, ref.refType(GciErrSType) ] ],
-        'GciTsBreak'                : [ 'bool',     [ GciSessionType, 'bool', ref.refType(GciErrSType) ] ],
-        'GciTsCommit'               : [ 'bool',     [ GciSessionType, ref.refType(GciErrSType) ] ],
-        'GciTsCallInProgress'       : [ 'int',      [ GciSessionType, ref.refType(GciErrSType) ] ],
+        'GciTsAbort'                : [ 'bool',     [ GciSessionType, 'pointer' ] ],
+        'GciTsBegin'                : [ 'bool',     [ GciSessionType, 'pointer' ] ],
+        'GciTsBreak'                : [ 'bool',     [ GciSessionType, 'bool', 'pointer' ] ],
+        'GciTsCommit'               : [ 'bool',     [ GciSessionType, 'pointer' ] ],
+        'GciTsCallInProgress'       : [ 'int',      [ GciSessionType, 'pointer' ] ],
         'GciTsCharToOop'            : [ OopType,    [ 'uint' ] ],
         'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double'] ], 
-        'GciTsExecute'              : [ OopType,    [ GciSessionType, 'string', OopType, OopType, OopType, 'int', 'uint16', ref.refType(GciErrSType) ] ],
-        'GciTsExecute_'             : [ OopType,    [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'int', 'uint16', ref.refType(GciErrSType) ] ],
-        'GciTsExecuteFetchBytes'    : [ 'int',      [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'pointer', 'uint16', ref.refType(GciErrSType) ] ],
-        'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, ref.refType(GciErrSType) ] ],
-        'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, ref.refType(GciErrSType) ] ],
-        'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, ref.refType(GciErrSType) ] ],
-        'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', ref.refType(GciErrSType) ] ],
-        'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, ref.refType(GciErrSType) ] ],
+        'GciTsExecute'              : [ OopType,    [ GciSessionType, 'string', OopType, OopType, OopType, 'int', 'uint16', 'pointer' ] ],
+        'GciTsExecute_'             : [ OopType,    [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'int', 'uint16', 'pointer' ] ],
+        'GciTsExecuteFetchBytes'    : [ 'int',      [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'pointer', 'uint16', 'pointer' ] ],
+        'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, 'pointer' ] ],
+        'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, 'pointer' ] ],
+        'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, 'pointer' ] ],
+        'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', 'pointer' ] ],
+        'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, 'pointer' ] ],
         'GciTsLogin'                : [ GciSessionType, [ 
             'string', // const char *StoneNameNrs
             'string', // const char *HostUserId
@@ -58,14 +53,14 @@ GciLibrary = (path) => {
             'string', // const char *gemstonePassword
             'uint',   // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
             'int',    // int haltOnErrNum
-            ref.refType(GciErrSType) // GciErrSType *err
+            'pointer' // GciErrSType *err
         ] ],
-        'GciTsLogout'               : [ 'bool',     [ GciSessionType, ref.refType(GciErrSType) ] ],
+        'GciTsLogout'               : [ 'bool',     [ GciSessionType, 'pointer' ] ],
         'GciTsOopIsSpecial'         : [ 'bool',     [ OopType ] ],
         'GciTsOopToChar'            : [ 'int',      [ OopType ] ],
-        'GciTsPerform'              : [ OopType,    [ GciSessionType, OopType, OopType, 'string', ArrayType(OopType), 'int', 'int', 'uint16', ref.refType(GciErrSType) ] ],
-        'GciTsPerformFetchBytes'    : [ OopType,    [ GciSessionType, OopType, 'string', ArrayType(OopType), 'int', 'pointer', 'uint16', ref.refType(GciErrSType) ] ],
-        'GciTsResolveSymbol'        : [ OopType,    [ OopType, 'string', OopType, ref.refType(GciErrSType) ] ],
+        'GciTsPerform'              : [ OopType,    [ GciSessionType, OopType, OopType, 'string', 'pointer', 'int', 'int', 'uint16', 'pointer' ] ],
+        'GciTsPerformFetchBytes'    : [ OopType,    [ GciSessionType, OopType, 'string', 'pointer', 'int', 'pointer', 'uint16', 'pointer' ] ],
+        'GciTsResolveSymbol'        : [ OopType,    [ OopType, 'string', OopType, 'pointer' ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
