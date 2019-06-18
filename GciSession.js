@@ -188,4 +188,4 @@ class GciSession {
     }
 }
 
-module.exports = { GciSession, };
+module.exports = { GciSession };
