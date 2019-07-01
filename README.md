@@ -1,26 +1,23 @@
 # GciForJavaScript
 JavaScript FFI wrapper for GemStone C Interface (GCI)
 
-[GemStone](https://gemtalksystems.com/products/gs64/) is an object database and Smalltalk application runtime environment. You interact with the database through a dynamically linked C library available for Linux, macOS, and Windows. To use a C library from JavaScript we use [ffi-napi](https://github.com/node-ffi-napi/node-ffi-napi), a foreign function library wrapper that, along with [ref](https://github.com/TooTallNate/ref), allows us to define C types, structures, and function entry points, then load and call a C library.
+[GemStone](https://gemtalksystems.com/products/gs64/) is an object database and Smalltalk application runtime environment. You interact with the database through a dynamically linked C library available for Linux, macOS, and Windows. To use a C library from JavaScript we use [ffi-napi](https://github.com/node-ffi-napi/node-ffi-napi), a foreign function library wrapper that allows us to define C types, structures, and function entry points, then load and call a C library.
 
 GemBuilder for C documentation ([HTML](https://downloads.gemtalksystems.com/docs/GemStone64/3.4.x/GS64-GemBuilderC-3.4/GS64-GemBuilderC-3.4.htm) or [PDF](https://downloads.gemtalksystems.com/docs/GemStone64/3.4.x/GS64-GemBuilderforC-3.4.pdf)) describes the API for the *single-threaded* GCI library. We are using a new *thread-safe* library that has fewer functions (but more features). It is not separately documented, but has a header file, `gcits.hf`, that is the definitive specification (a recent copy is included with this checkout).
 
-The needed C libraries are not included as part of this checkout since there is a different set of libraries for each platform (Linux, macOS, and Windows), and for each GemStone version. You should download a recent version and the appropriate [product](https://gemtalksystems.com/products/gs64/) for your platform. Then move the appropriate files into this directory.
+The needed C libraries are not included as part of this checkout since there is a different set of libraries for each platform (Linux, macOS, and Windows), and for each GemStone version. You should download a recent version and the appropriate [product](https://gemtalksystems.com/products/gs64/) for your platform. Then move the appropriate files into the directory of your choice.
 
 * Linux: libfloss-3.4.x-64.so and libgcits-3.4.x-64.so
 * macOS: libfloss-3.4.x-64.dylib and libgcits-3.4.x-64.dylib
 * Windows: libgcits-3.4.x-32.dll and libssl-3.4.x-32.dll
 
-With the appropriate library, you should be able to run the code with the following:
-
-```
-npm install
-node .
-```
-
 ## Files
 
-This checkout has only one code file, index.js. This is strictly a proof-of-concept, and the code should be broken down into a public API, a private API, and tests. (It would be nice to have help from someone who understands how Node.js files should be organized.)
+We use index.js to import GciSession which has the primary public API. This is strictly a proof-of-concept, and is used by [VSCode-GemStone](https://github.com/jgfoster/vscode-gemstone). 
+
+## Tests
+
+With the Jest extension, create a debug configuration and run to see the tests.
 
 ## Contributing Code
 

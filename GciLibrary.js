@@ -35,31 +35,79 @@ GciLibrary = (path) => {
         'GciTsCallInProgress'       : [ 'int',      [ GciSessionType, 'pointer' ] ],
         'GciTsCharToOop'            : [ OopType,    [ 'uint' ] ],
         'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double'] ], 
-        'GciTsExecute'              : [ OopType,    [ GciSessionType, 'string', OopType, OopType, OopType, 'int', 'uint16', 'pointer' ] ],
-        'GciTsExecute_'             : [ OopType,    [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'int', 'uint16', 'pointer' ] ],
-        'GciTsExecuteFetchBytes'    : [ 'int',      [ GciSessionType, 'string', 'int64', OopType, OopType, OopType, 'pointer', 'uint16', 'pointer' ] ],
+        'GciTsExecute'              : [ OopType,    [ 
+                                        GciSessionType, 
+                                        'string',   // const char* sourceStr
+                                        OopType,    // sourceOop
+                                        OopType,    // contextObject
+                                        OopType,    // symbolList
+                                        'int',      // int flags
+                                        'uint16',   // ushort environmentId
+                                        'pointer'   // GciErrSType *err
+                                    ] ],
+        'GciTsExecute_'             : [ OopType,    [ 
+                                        GciSessionType, 
+                                        'string',   // const char* sourceStr
+                                        'int64',    // ssize_t sourceSize
+                                        OopType,    // sourceOop
+                                        OopType,    // context
+                                        OopType,    // symbolList
+                                        'int',      // flags
+                                        'uint16',   // ushort environmentId
+                                        'pointer'   // GciErrSType *err
+                                    ] ],
+        'GciTsExecuteFetchBytes'    : [ 'int64',    [ 
+                                        GciSessionType, 
+                                        'string',   // const char* sourceStr
+                                        'int64',    // ssize_t sourceSize
+                                        OopType,    // sourceOop
+                                        OopType,    // context
+                                        OopType,    // symbolList
+                                        'pointer',  // ByteType *result
+                                        'uint64',   // ssize_t maxResultSize
+                                        'pointer'   // GciErrSType *err
+                                    ] ],
         'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, 'pointer' ] ],
         'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, 'pointer' ] ],
         'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, 'pointer' ] ],
         'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', 'pointer' ] ],
         'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, 'pointer' ] ],
         'GciTsLogin'                : [ GciSessionType, [ 
-            'string', // const char *StoneNameNrs
-            'string', // const char *HostUserId
-            'string', // const char *HostPassword
-            'bool',   // BoolType hostPwIsEncrypted
-            'string', // const char *GemServiceNrs
-            'string', // const char *gemstoneUsername
-            'string', // const char *gemstonePassword
-            'uint',   // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
-            'int',    // int haltOnErrNum
-            'pointer' // GciErrSType *err
-        ] ],
+                                        'string', // const char *StoneNameNrs
+                                        'string', // const char *HostUserId
+                                        'string', // const char *HostPassword
+                                        'bool',   // BoolType hostPwIsEncrypted
+                                        'string', // const char *GemServiceNrs
+                                        'string', // const char *gemstoneUsername
+                                        'string', // const char *gemstonePassword
+                                        'uint',   // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
+                                        'int',    // int haltOnErrNum
+                                        'pointer' // GciErrSType *err
+                                    ] ],
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, 'pointer' ] ],
         'GciTsOopIsSpecial'         : [ 'bool',     [ OopType ] ],
         'GciTsOopToChar'            : [ 'int',      [ OopType ] ],
-        'GciTsPerform'              : [ OopType,    [ GciSessionType, OopType, OopType, 'string', 'pointer', 'int', 'int', 'uint16', 'pointer' ] ],
-        'GciTsPerformFetchBytes'    : [ OopType,    [ GciSessionType, OopType, 'string', 'pointer', 'int', 'pointer', 'uint16', 'pointer' ] ],
+        'GciTsPerform'              : [ OopType,    [ 
+                                        GciSessionType, 
+                                        OopType,    // receiver
+                                        OopType,    // aSymbol 
+                                        'string',   // const char* selectorStr 
+                                        'pointer',  // const OopType *args
+                                        'int',      // int numArgs
+                                        'int',      // int flags
+                                        'uint16',   // ushort environmentId
+                                        'pointer'   // GciErrSType *err
+                                    ] ],
+        'GciTsPerformFetchBytes'    : [ OopType,    [ 
+                                        GciSessionType, 
+                                        OopType,    // receiver 
+                                        'string',   // const char *selectorStr
+                                        'pointer',  // const OopType *args 
+                                        'int',      // int numArgs
+                                        'pointer',  // ByteType *result
+                                        'uint64',   // ssize_t  maxResultSize
+                                        'pointer'   // GciErrSType *err 
+                                    ] ],
         'GciTsResolveSymbol'        : [ OopType,    [ OopType, 'string', OopType, 'pointer' ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
