@@ -1,6 +1,6 @@
 {
-  "name": "gci-js",
-  "version": "1.0.2",
+  "name": "gci",
+  "version": "1.1.0",
   "description": "JavaScript FFI wrapper for the GemStone C Interface (GCI) Library",
   "main": "index.js",
   "scripts": {
