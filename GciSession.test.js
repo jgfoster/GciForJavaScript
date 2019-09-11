@@ -3,8 +3,8 @@
  */
 
 const { GciSession } = require("./GciSession");
-var session;
-var nil, arrayClass, globals, objectClass, symbolDictionaryClass;
+let session;
+let nil, arrayClass, globals, objectClass, symbolDictionaryClass;
 
 getLogin = () => {
     const fs = require('fs');
@@ -20,7 +20,7 @@ getLogin = () => {
 const login = getLogin();
 
 test('bad user', () => {
-    var error;
+    let error;
     try {
         session = new GciSession({...login, gs_user: 'no such user'});
     } catch (e) {
@@ -31,7 +31,7 @@ test('bad user', () => {
 })
 
 test('login', () => {
-    var error;
+    let error;
     try {
         session = new GciSession(login);
     } catch (e) {
@@ -42,7 +42,7 @@ test('login', () => {
 })
 
 test('abort', () => {
-    var error;
+    let error;
     try {
         session.abort();
     } catch (e) {
@@ -52,7 +52,7 @@ test('abort', () => {
 })
 
 test('begin', () => {
-    var error;
+    let error;
     try {
         session.begin();
     } catch (e) {
@@ -62,7 +62,7 @@ test('begin', () => {
 })
 
 test('break (hard)', () => {
-    var error;
+    let error;
     try {
         session.hardBreak();
     } catch (e) {
@@ -72,7 +72,7 @@ test('break (hard)', () => {
 })
 
 test('break (soft)', () => {
-    var error;
+    let error;
     try {
         session.softBreak();
     } catch (e) {
@@ -82,7 +82,7 @@ test('break (soft)', () => {
 })
 
 test('commit', () => {
-    var error;
+    let error;
     try {
         session.commit();
     } catch (e) {
@@ -92,7 +92,7 @@ test('commit', () => {
 })
 
 test('isCallInProgress', () => {
-    var error, flag;
+    let error, flag;
     try {
         flag = session.isCallInProgress();
     } catch (e) {
@@ -103,7 +103,7 @@ test('isCallInProgress', () => {
 })
 
 test('trace', () => {
-    var error, flag0, flag1, flag2, flag3;
+    let error, flag0, flag1, flag2, flag3;
     try {
         flag0 = session.trace(1);
         flag1 = session.trace(2);
@@ -120,7 +120,7 @@ test('trace', () => {
 })
 
 test('resolveSymbol', () => {
-    var error, other;
+    let error, other;
     try {
         nil = session.resolveSymbol('nil');
         arrayClass = session.resolveSymbol('Array');
@@ -139,8 +139,21 @@ test('resolveSymbol', () => {
     expect(error.message).toBe('Symbol not found!');
 })
 
+test('resolveSymbolObj', () => {
+    let error, oop;
+    try {
+        oop = session.execute('#Array');
+        oop = session.resolveSymbolObj(oop);
+    } catch (e) {
+        error = e;
+    }
+    expect(error).toBe(undefined);
+    expect(oop).toBe(66817);    // Array
+
+})
+
 test('fetchClass', () => {
-    var error, oop;
+    let error, oop;
     try {
         oop = session.fetchClass(globals);
     } catch (e) {
@@ -151,7 +164,7 @@ test('fetchClass', () => {
 })
 
 test('fetchSize', () => {
-    var error, sizeOfNil, sizeOfArrayClass, sizeOfGlobals;
+    let error, sizeOfNil, sizeOfArrayClass, sizeOfGlobals;
     try {
         sizeOfNil = session.fetchSize(nil);
         sizeOfArrayClass = session.fetchSize(arrayClass);
@@ -166,7 +179,7 @@ test('fetchSize', () => {
 })
 
 test('fetchVaryingSize', () => {
-    var error, sizeOfNil, sizeOfArrayClass, sizeOfGlobals;
+    let error, sizeOfNil, sizeOfArrayClass, sizeOfGlobals;
     try {
         sizeOfArrayClass = session.fetchVaryingSize(arrayClass);
         sizeOfGlobals = session.fetchVaryingSize(globals);
@@ -179,7 +192,7 @@ test('fetchVaryingSize', () => {
 })
 
 test('isKindOf', () => {
-    var error, flag1, flag2;
+    let error, flag1, flag2;
     try {
         flag1 = session.isKindOf(globals, symbolDictionaryClass);
         flag2 = session.isKindOf(nil, symbolDictionaryClass);
@@ -192,7 +205,7 @@ test('isKindOf', () => {
 })
 
 test('execute', () => {
-    var error, oop1, oop2;
+    let error, oop1, oop2;
     try {
         oop1 = session.execute('Array');
         oop2 = session.execute('2 + 3');
@@ -205,7 +218,7 @@ test('execute', () => {
 })
 
 test('executeFetchBytes', () => {
-    var error, string;
+    let error, string;
     try {
         string = session.executeFetchBytes("'Hello World!'", 16);
     } catch (e) {
@@ -216,7 +229,7 @@ test('executeFetchBytes', () => {
 })
 
 test('perform', () => {
-    var error, oop1, oop2;
+    let error, oop1, oop2;
     try {
         oop1 = session.perform(globals, 'yourself', []);
         oop2 = session.perform(18, '+', [26]);  // 2 + 3
@@ -229,7 +242,7 @@ test('perform', () => {
 })
 
 test('performFetchBytes', () => {
-    var error, string1, string2, string3;
+    let error, string1, string2, string3;
     try {
         string1 = session.performFetchBytes(42, 'printString', [], 8);
         string2 = session.performFetchBytes(arrayClass, 'printString', [], 6);
@@ -244,7 +257,7 @@ test('performFetchBytes', () => {
 })
 
 test('logout', () => {
-    var error;
+    let error;
     try {
         session.logout();
     } catch (e) {
@@ -254,7 +267,7 @@ test('logout', () => {
 })
 
 test('logout', () => {
-    var error;
+    let error;
     try {
         session.logout();
     } catch (e) {

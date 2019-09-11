@@ -160,6 +160,14 @@ class GciSession {
         return oop;
     }
 
+    resolveSymbolObj(stringOop, symbolList = OOP_NIL) {
+        const oop = this.gci.GciTsResolveSymbolObj(this.session, stringOop, symbolList, this.error.ref());
+        if (oop === OOP_ILLEGAL) {
+            throw new Error('Symbol not found!');
+        }
+        return oop;
+    }
+
     softBreak() {
         if (!this.gci.GciTsBreak(this.session, false, this.error.ref())) {
             throw new Error(this.error.message());

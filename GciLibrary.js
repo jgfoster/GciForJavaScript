@@ -35,6 +35,7 @@ GciLibrary = (path) => {
         'GciTsCallInProgress'       : [ 'int',      [ GciSessionType, 'pointer' ] ],
         'GciTsCharToOop'            : [ OopType,    [ 'uint' ] ],
         'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double'] ], 
+        'GciTsEncrypt'              : [ 'string',   [ 'string', 'pointer', 'int64' ]],
         'GciTsExecute'              : [ OopType,    [ 
                                         GciSessionType, 
                                         'string',   // const char* sourceStr
@@ -108,7 +109,9 @@ GciLibrary = (path) => {
                                         'uint64',   // ssize_t  maxResultSize
                                         'pointer'   // GciErrSType *err 
                                     ] ],
-        'GciTsResolveSymbol'        : [ OopType,    [ OopType, 'string', OopType, 'pointer' ] ],
+        'GciTsProtectMethods'       : [ 'bool',     [ GciSessionType, 'bool', 'pointer' ] ],
+        'GciTsResolveSymbol'        : [ OopType,    [ GciSessionType, 'string', OopType, 'pointer' ] ],
+        'GciTsResolveSymbolObj'     : [ OopType,    [ GciSessionType, OopType, OopType, 'pointer' ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
