@@ -56,8 +56,8 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ```C
 ✓   BoolType   GciTsBreak(GciSession sess, BoolType hard, GciErrSType *err);
 ✓   int        GciTsCallInProgress(GciSession sess, GciErrSType *err);
-    BoolType   GciTsClearStack(GciSession sess, OopType gsProcess, GciErrSType *err);
-    OopType    GciTsContinueWith(GciSession sess, ...);
+✓   BoolType   GciTsClearStack(GciSession sess, OopType gsProcess, GciErrSType *err);
+✓   OopType    GciTsContinueWith(GciSession sess, ...);
 ✓   int        GciTsGemTrace(GciSession sess, int enable, GciErrSType *err);
 ```
 
@@ -110,15 +110,15 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ```C
 ✓   BoolType   GciTsOopIsSpecial(OopType oop);
-    OopType    GciTsFetchSpecialClass(OopType oop);
+✓   OopType    GciTsFetchSpecialClass(OopType oop);
 ✓   int        GciTsOopToChar(OopType oop);
 ✓   OopType    GciTsCharToOop(uint ch);
 ✓   OopType    GciTsDoubleToSmallDouble(double aFloat);
     BoolType   GciUtf8To8bit(const char* src, char *dest, ssize_t destSize);
     ssize_t    GciNextUtf8Character(const char* src, size_t len, uint *chOut);
 ✓   OopType    GciI32ToOop(int arg);
-    OopType    GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err);
-    BoolType   GciTsOopToDouble(GciSession sess, OopType oop, ...);
+✓   OopType    GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err);
+✓   BoolType   GciTsOopToDouble(GciSession sess, OopType oop, ...);
     OopType    GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err);
     BoolType   GciTsOopToI64(GciSession sess, OopType oop, int64 *result, GciErrSType *err);
 ```

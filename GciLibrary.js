@@ -8,6 +8,7 @@ const OOP_ILLEGAL = 1;
 const OOP_NIL = 20;
 const OOP_CLASS_STRING = 74753;
 
+const pGciErrSType = 'pointer';
 const GciSessionType = 'int64';
 const OopType = 'int64';
 
@@ -15,8 +16,8 @@ class GciErrSType {       // gci.ht
     constructor() { this.buffer = Buffer.alloc(2200);   }   // 2163 plus some padding
     ref()       { return this.buffer;                   }
     category()  { return this.buffer.readIntLE(  0, 6); }   // size is actually 8 bytes, but Buffer only supports 6 bytes before Node.js v12.0.0
-    context()   { return this.buffer.readIntLE(  8, 6); }
-    exception() { return this.buffer.readIntLE( 16, 6); }
+    context()   { return this.buffer.readIntLE(  8, 6); }   // OOP of GsProcess
+    exception() { return this.buffer.readIntLE( 16, 6); }   // OOP of Exception object
     // args() an array of 10 OopType values
     number()    { return this.buffer.readIntLE(104, 4); }
     argCount()  { return this.buffer.readIntLE(108, 4); }
@@ -28,13 +29,16 @@ class GciErrSType {       // gci.ht
 GciLibrary = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType,    [ 'int'] ], 
-        'GciTsAbort'                : [ 'bool',     [ GciSessionType, 'pointer' ] ],
-        'GciTsBegin'                : [ 'bool',     [ GciSessionType, 'pointer' ] ],
-        'GciTsBreak'                : [ 'bool',     [ GciSessionType, 'bool', 'pointer' ] ],
-        'GciTsCommit'               : [ 'bool',     [ GciSessionType, 'pointer' ] ],
-        'GciTsCallInProgress'       : [ 'int',      [ GciSessionType, 'pointer' ] ],
+        'GciTsAbort'                : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
+        'GciTsBegin'                : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
+        'GciTsBreak'                : [ 'bool',     [ GciSessionType, 'bool', pGciErrSType ] ],
+        'GciTsClearStack'           : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
+        'GciTsContinueWith'         : [ OopType,    [ GciSessionType, OopType, OopType, 'pointer', 'int', pGciErrSType ] ],
+        'GciTsCommit'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
+        'GciTsCallInProgress'       : [ 'int',      [ GciSessionType, pGciErrSType ] ],
         'GciTsCharToOop'            : [ OopType,    [ 'uint' ] ],
-        'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double'] ], 
+        'GciTsDoubleToOop'          : [ OopType,    [ GciSessionType, 'double', pGciErrSType ] ],
+        'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double', pGciErrSType ] ], 
         'GciTsEncrypt'              : [ 'string',   [ 'string', 'pointer', 'int64' ]],
         'GciTsExecute'              : [ OopType,    [ 
                                         GciSessionType, 
@@ -68,11 +72,12 @@ GciLibrary = (path) => {
                                         'uint64',   // ssize_t maxResultSize
                                         'pointer'   // GciErrSType *err
                                     ] ],
-        'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, 'pointer' ] ],
-        'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, 'pointer' ] ],
-        'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, 'pointer' ] ],
-        'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', 'pointer' ] ],
-        'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, 'pointer' ] ],
+        'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
+        'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
+        'GciTsFetchSpecialClass'    : [ OopType,    [ OopType ] ],
+        'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
+        'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', pGciErrSType ] ],
+        'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsLogin'                : [ GciSessionType, [ 
                                         'string', // const char *StoneNameNrs
                                         'string', // const char *HostUserId
@@ -85,9 +90,10 @@ GciLibrary = (path) => {
                                         'int',    // int haltOnErrNum
                                         'pointer' // GciErrSType *err
                                     ] ],
-        'GciTsLogout'               : [ 'bool',     [ GciSessionType, 'pointer' ] ],
+        'GciTsLogout'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
         'GciTsOopIsSpecial'         : [ 'bool',     [ OopType ] ],
         'GciTsOopToChar'            : [ 'int',      [ OopType ] ],
+        'GciTsOopToDouble'          : [ 'bool',     [ GciSessionType, OopType, 'pointer', pGciErrSType ] ],
         'GciTsPerform'              : [ OopType,    [ 
                                         GciSessionType, 
                                         OopType,    // receiver
@@ -109,9 +115,9 @@ GciLibrary = (path) => {
                                         'uint64',   // ssize_t  maxResultSize
                                         'pointer'   // GciErrSType *err 
                                     ] ],
-        'GciTsProtectMethods'       : [ 'bool',     [ GciSessionType, 'bool', 'pointer' ] ],
-        'GciTsResolveSymbol'        : [ OopType,    [ GciSessionType, 'string', OopType, 'pointer' ] ],
-        'GciTsResolveSymbolObj'     : [ OopType,    [ GciSessionType, OopType, OopType, 'pointer' ] ],
+        'GciTsProtectMethods'       : [ 'bool',     [ GciSessionType, 'bool', pGciErrSType ] ],
+        'GciTsResolveSymbol'        : [ OopType,    [ GciSessionType, 'string', OopType, pGciErrSType ] ],
+        'GciTsResolveSymbolObj'     : [ OopType,    [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });

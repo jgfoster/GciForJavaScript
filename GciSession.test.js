@@ -4,7 +4,7 @@
 
 const { GciSession } = require("./GciSession");
 let session;
-let nil, arrayClass, globals, objectClass, symbolDictionaryClass;
+let nil, arrayClass, globals, objectClass, symbolDictionaryClass, undefinedObjectClass;
 
 getLogin = () => {
     const fs = require('fs');
@@ -27,7 +27,7 @@ test('bad user', () => {
         error = e;
     }
     expect(session).toBe(undefined);
-    expect(error.message).toBe('Login failed:  the userId/password combination is invalid or expired.');
+    expect(error.message()).toBe('Login failed:  the userId/password combination is invalid or expired.');
 })
 
 test('login', () => {
@@ -127,6 +127,7 @@ test('resolveSymbol', () => {
         globals = session.resolveSymbol('Globals');
         objectClass = session.resolveSymbol('Object');
         symbolDictionaryClass = session.resolveSymbol('SymbolDictionary');
+        undefinedObjectClass = session.resolveSymbol('UndefinedObject');
         other = session.resolveSymbol('should not be found!');
     } catch (e) {
         error = e;
@@ -256,6 +257,75 @@ test('performFetchBytes', () => {
     expect(error.message).toBe('Actual size of 5 exceeded buffer size of 4');
 })
 
+test('continue', () => {
+    let error, oop;
+    try {
+        oop = session.execute('2 halt + 3');
+    } catch (e) {
+        error = e;
+    }
+    expect(oop).toBe(undefined);
+    expect(error.message()).toBe('a Halt occurred (error 2709)');
+    oop = session.continueWith(error.context());
+    expect(oop).toBe(42);
+})
+
+test('continueWith', () => {
+    let error, oop;
+    try {
+        oop = session.execute('5 / 0');
+    } catch (e) {
+        error = e;
+    }
+    expect(oop).toBe(undefined);
+    expect(error.number()).toBe(2026); // a ZeroDivide occurred
+    oop = session.continueWith(error.context(), 42);
+    expect(oop).toBe(42);
+})
+
+test('clearStack', () => {
+    let error, oop, gsProcess;
+    try {
+        oop = session.execute('5 / 0');
+    } catch (e) {
+        error = e;
+    }
+    expect(oop).toBe(undefined);
+    expect(error.number()).toBe(2026); // a ZeroDivide occurred
+    gsProcess = error.context();
+    try {
+        session.clearStack(gsProcess);
+        oop = session.continueWith(gsProcess);
+    } catch (e) {
+        error = e;
+    }
+    expect(oop).toBe(undefined);
+    expect(error.number()).toBe(2092); // an InternalError occurred
+})
+
+test('fetchSpecialClass', () => {
+    let error;
+    expect(session.fetchSpecialClass(nil)).toBe(undefinedObjectClass);
+    try {
+        session.fetchSpecialClass(21);
+    } catch (e) {
+        error = e;
+    }
+    expect(error.message).toBe('Not a special OOP');
+})
+
+test('doubleToOop', () => {
+    let oop;
+    oop = session.doubleToOop(1.0);
+    expect(oop).toBe('9151314442816847878');
+})
+
+test('oopToDouble', () => {
+    const oop = '9151314442816847878';
+    const double = session.oopToDouble(oop);
+    expect(double).toBe(1.0);
+})
+
 test('logout', () => {
     let error;
     try {
@@ -273,7 +343,7 @@ test('logout', () => {
     } catch (e) {
         error = e;
     }
-    expect(error.message).toBe('argument is not a valid GciSession pointer');
+    expect(error.message()).toBe('argument is not a valid GciSession pointer');
 })
 
 test('version', () => {
