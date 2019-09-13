@@ -64,9 +64,9 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ### Table 7.3 Functions for Managing Object Bitmaps
 
 ```C
-    BoolType   GciTsReleaseObjs(GciSession sess, OopType *buf, int count, GciErrSType *err);
-    BoolType   GciTsReleaseAllObjs(GciSession sess, GciErrSType *err);
-    BoolType   GciTsSaveObjs(GciSession sess, OopType *buf, int count, GciErrSType *err);
+✓   BoolType   GciTsReleaseObjs(GciSession sess, OopType *buf, int count, GciErrSType *err);
+✓   BoolType   GciTsReleaseAllObjs(GciSession sess, GciErrSType *err);
+✓   BoolType   GciTsSaveObjs(GciSession sess, OopType *buf, int count, GciErrSType *err);
 ```
 
 ### Table 7.4 Functions for Compiling and Executing Smalltalk Code in the Database

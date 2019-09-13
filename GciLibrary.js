@@ -126,8 +126,11 @@ GciLibrary = (path) => {
                                         'pointer'   // GciErrSType *err 
                                     ] ],
         'GciTsProtectMethods'       : [ 'bool',     [ GciSessionType, 'bool', pGciErrSType ] ],
+        'GciTsReleaseAllObjs'       : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
+        'GciTsReleaseObjs'          : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsResolveSymbol'        : [ OopType,    [ GciSessionType, 'string', OopType, pGciErrSType ] ],
         'GciTsResolveSymbolObj'     : [ OopType,    [ GciSessionType, OopType, OopType, pGciErrSType ] ],
+        'GciTsSaveObjs'             : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });

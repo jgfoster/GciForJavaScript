@@ -273,6 +273,24 @@ class GciSession {
         return buffer.toString('utf8', 0, actualSize);
     }
 
+    releaseAllObjs() {
+        if (!this.gci.GciTsReleaseAllObjs(this.session, this.error.ref())) {
+            throw this.error;
+        }
+    }
+
+    releaseObjs(oopArray) {
+        const buffer = Buffer.alloc(oopArray.length * 8);
+        for (let i = 0; i < oopArray.length; i++) {
+            const oop = oopArray[i];
+            buffer.writeInt32LE(oop % 0x100000000, i * 8);
+            buffer.writeInt32LE(Math.floor(oop / 0x100000000), i * 8 + 4);
+        }
+        if (!this.gci.GciTsReleaseObjs(this.session, buffer, oopArray.length, this.error.ref())) {
+            throw this.error;
+        }
+    }
+
     resolveSymbol(string, symbolList = OOP_NIL) {
         const oop = this.gci.GciTsResolveSymbol(this.session, string, symbolList, this.error.ref());
         if (oop === OOP_ILLEGAL) {
@@ -287,6 +305,18 @@ class GciSession {
             throw new Error('Symbol not found!');
         }
         return oop;
+    }
+
+    saveObjs(oopArray) {
+        const buffer = Buffer.alloc(oopArray.length * 8);
+        for (let i = 0; i < oopArray.length; i++) {
+            const oop = oopArray[i];
+            buffer.writeInt32LE(oop % 0x100000000, i * 8);
+            buffer.writeInt32LE(Math.floor(oop / 0x100000000), i * 8 + 4);
+        }
+        if (!this.gci.GciTsSaveObjs(this.session, buffer, oopArray.length, this.error.ref())) {
+            throw this.error;
+        }
     }
 
     softBreak() {

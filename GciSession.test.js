@@ -4,8 +4,8 @@
 
 const { GciSession } = require("./GciSession");
 let session;
-let nil, arrayClass, byteArrayClass, collectionClass, globals, objectClass, stringClass, symbolClass, 
-    symbolDictionaryClass, undefinedObjectClass;
+let nil, arrayClass, byteArrayClass, collectionClass, falseOop, globals, objectClass, stringClass, symbolClass, 
+    symbolDictionaryClass, trueOop, undefinedObjectClass;
 
 getLogin = () => {
     const fs = require('fs');
@@ -127,11 +127,13 @@ test('resolveSymbol', () => {
         arrayClass = session.resolveSymbol('Array');
         byteArrayClass = session.resolveSymbol('ByteArray');
         collectionClass = session.resolveSymbol('Collection');
+        falseOop = session.resolveSymbol('false');
         globals = session.resolveSymbol('Globals');
         objectClass = session.resolveSymbol('Object');
         stringClass = session.resolveSymbol('String');
         symbolClass = session.resolveSymbol('Symbol');
         symbolDictionaryClass = session.resolveSymbol('SymbolDictionary');
+        trueOop = session.resolveSymbol('true');
         undefinedObjectClass = session.resolveSymbol('UndefinedObject');
         other = session.resolveSymbol('should not be found!');
     } catch (e) {
@@ -391,6 +393,19 @@ test('newString', () => {
 test('newSymbol', () => {
     let obj = session.newSymbol('Array');
     expect(session.isKindOf(obj, symbolClass)).toBe(true);
+})
+
+test('object bitmaps', () => {
+    const oop = session.newSymbol('Array');
+    let string = '(GsBitmap newForHiddenSet: #PureExportSet) _doAsOops: [:each | (each == ';
+    string = string + oop.toString() + ') ifTrue: [^true]]. false.';
+    expect(session.execute(string)).toBe(trueOop);
+    session.releaseAllObjs();
+    expect(session.execute(string)).toBe(falseOop);
+    session.saveObjs([ oop ]);
+    expect(session.execute(string)).toBe(trueOop);
+    session.releaseObjs([ oop ]);
+    expect(session.execute(string)).toBe(falseOop);
 })
 
 test('logout', () => {
