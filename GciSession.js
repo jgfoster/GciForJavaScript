@@ -126,6 +126,14 @@ class GciSession {
         }
     }
 
+    i64ToOop(int) {
+        const result = this.gci.GciTsI64ToOop(this.session, int, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
     isCallInProgress() {
         const flag = this.gci.GciTsCallInProgress(this.session, this.error.ref());
         if (flag === -1) {
@@ -142,11 +150,75 @@ class GciSession {
         return flag === 1;
     }
 
+    isKindOfClass(objectOop, classOop) {
+        const flag = this.gci.GciTsIsKindOfClass(this.session, objectOop, classOop, this.error.ref());
+        if (flag === -1) {
+            throw this.error;
+        }
+        return flag === 1;
+    }
+
+    isSubclassOf(child, parent) {
+        const flag = this.gci.GciTsIsSubclassOf(this.session, child, parent, this.error.ref());
+        if (flag === -1) {
+            throw this.error;
+        }
+        return flag === 1;
+    }
+
+    isSubclassOfClass(child, parent) {
+        const flag = this.gci.GciTsIsSubclassOfClass(this.session, child, parent, this.error.ref());
+        if (flag === -1) {
+            throw this.error;
+        }
+        return flag === 1;
+    }
+
     logout() {
         if (!this.gci.GciTsLogout(this.session, this.error.ref())) {
             throw this.error;
         }
         this.session = 0;
+    }
+
+    newByteArray(bytes = '', size = bytes.length) {
+        const result = this.gci.GciTsNewByteArray(this.session, bytes, size, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
+    newObj(classOop) {
+        const result = this.gci.GciTsNewObj(this.session, classOop, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
+    newString(bytes = '', size = bytes.length) {
+        const result = this.gci.GciTsNewString(this.session, bytes, size, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
+    newSymbol(bytes) {
+        const result = this.gci.GciTsNewSymbol(this.session, bytes, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
+    objExists(oop) {
+        return this.gci.GciTsObjExists(this.session, oop);
+    }
+
+    oopIsSpecial(oop) {
+        return this.gci.GciTsOopIsSpecial(oop);
     }
 
     oopToDouble(oop) {
@@ -155,7 +227,17 @@ class GciSession {
         if (!flag) {
             throw this.error;
         }
-        return buffer.readDoubleLE(0);
+        return buffer.readDoubleLE();
+    }
+
+    oopToI64(oop) {
+        const buffer = Buffer.alloc(8);
+        const flag = this.gci.GciTsOopToI64(this.session, oop, buffer, this.error.ref());
+        if (!flag) {
+            throw this.error;
+        }
+        const hi = buffer.readInt32LE(4), lo = buffer.readInt32LE(0);
+        return hi * 0x100000000 + lo;
     }
 
     perform(receiver, selector, oopArray) {

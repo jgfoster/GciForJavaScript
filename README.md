@@ -93,14 +93,11 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ```C
     int        GciTsGetFreeOops(GciSession sess, OopType *buf, int numOopsRequested, GciErrSType *err);
-    OopType    GciTsNewObj(GciSession sess, OopType aClass, GciErrSType *err);
-    OopType    GciTsNewByteArray(GciSession sess, ...);
-    OopType    GciTsNewString_(GciSession sess, ...);
-    OopType    GciTsNewString(GciSession sess, ...);
-    OopType    GciTsNewSymbol(GciSession sess, ...);
+✓   OopType    GciTsNewObj(GciSession sess, OopType aClass, GciErrSType *err);
+✓   OopType    GciTsNewByteArray(GciSession sess, ...);
+✓   OopType    GciTsNewString_(GciSession sess, ...);
+✓   OopType    GciTsNewSymbol(GciSession sess, ...);
     OopType    GciTsNewUnicodeString_(GciSession sess, ...);
-    OopType    GciTsNewUnicodeString(GciSession sess, ...);
-    OopType    GciTsNewUtf8String(GciSession sess, ...);
     OopType    GciTsNewUtf8String_(GciSession sess, ...);
     int64      GciTsFetchUnicode(GciSession sess, ...);
     int64      GciTsFetchUtf8(GciSession sess, ...);
@@ -119,8 +116,8 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ✓   OopType    GciI32ToOop(int arg);
 ✓   OopType    GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err);
 ✓   BoolType   GciTsOopToDouble(GciSession sess, OopType oop, ...);
-    OopType    GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err);
-    BoolType   GciTsOopToI64(GciSession sess, OopType oop, int64 *result, GciErrSType *err);
+✓   OopType    GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err);
+✓   BoolType   GciTsOopToI64(GciSession sess, OopType oop, int64 *result, GciErrSType *err);
 ```
 
 ### Table 7.8 Object Traversal and Path Functions
@@ -147,10 +144,10 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ✓   int64      GciTsFetchVaryingSize(GciSession sess, OopType obj, GciErrSType *err);
 ✓   OopType    GciTsFetchClass(GciSession sess, OopType obj, GciErrSType *err);
 ✓   int        GciTsIsKindOf(GciSession sess, ...);
-    int        GciTsIsSubclassOf(GciSession sess, ...);
-    int        GciTsIsKindOfClass(GciSession sess, ...);
-    int        GciTsIsSubclassOfClass(GciSession sess, ...);
-    BoolType   GciTsObjExists(GciSession sess, OopType obj);
+✓   int        GciTsIsSubclassOf(GciSession sess, ...);
+✓   int        GciTsIsKindOfClass(GciSession sess, ...);
+✓   int        GciTsIsSubclassOfClass(GciSession sess, ...);
+✓   BoolType   GciTsObjExists(GciSession sess, OopType obj);
 ```
 
 ### Table 7.10 Utility Functions
@@ -161,7 +158,9 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
     BoolType   GciTsCancelWaitForEvent(GciSession sess, GciErrSType *err);
 ```
 
-## Fork Functions
+## Other Functions
+
+### Fork
 
 GciTs offers a variety of `Fork` functions that take a callback. But since `node-ffi` supports async library calls, we don't need to do it ourselves.
 
@@ -171,4 +170,14 @@ GciTs offers a variety of `Fork` functions that take a callback. But since `node
     BoolType   GciTsForkExecute(GciSession sess, ...);
     BoolType   GciTsForkPerform(GciSession sess, ...);
     BoolType   GciTsForkStoreTravDoTravRefs(GciSession sess, ...);
+```
+
+### String
+
+The following are deprecated in favor of the underscore version.
+
+```C
+    OopType    GciTsNewString(GciSession sess, ...);
+    OopType    GciTsNewUnicodeString(GciSession sess, ...);
+    OopType    GciTsNewUtf8String(GciSession sess, ...);
 ```

@@ -4,7 +4,8 @@
 
 const { GciSession } = require("./GciSession");
 let session;
-let nil, arrayClass, globals, objectClass, symbolDictionaryClass, undefinedObjectClass;
+let nil, arrayClass, byteArrayClass, collectionClass, globals, objectClass, stringClass, symbolClass, 
+    symbolDictionaryClass, undefinedObjectClass;
 
 getLogin = () => {
     const fs = require('fs');
@@ -124,8 +125,12 @@ test('resolveSymbol', () => {
     try {
         nil = session.resolveSymbol('nil');
         arrayClass = session.resolveSymbol('Array');
+        byteArrayClass = session.resolveSymbol('ByteArray');
+        collectionClass = session.resolveSymbol('Collection');
         globals = session.resolveSymbol('Globals');
         objectClass = session.resolveSymbol('Object');
+        stringClass = session.resolveSymbol('String');
+        symbolClass = session.resolveSymbol('Symbol');
         symbolDictionaryClass = session.resolveSymbol('SymbolDictionary');
         undefinedObjectClass = session.resolveSymbol('UndefinedObject');
         other = session.resolveSymbol('should not be found!');
@@ -203,6 +208,31 @@ test('isKindOf', () => {
     expect(error).toBe(undefined);
     expect(flag1).toBe(true);
     expect(flag2).toBe(false);
+})
+
+test('isKindOfClass', () => {
+    expect(session.isKindOfClass(globals, symbolDictionaryClass)).toBe(true);
+    expect(session.isKindOfClass(nil, symbolDictionaryClass)).toBe(false);
+})
+
+test('isSubclassOf', () => {
+    expect(session.isSubclassOf(arrayClass, collectionClass)).toBe(true);
+    expect(session.isSubclassOf(collectionClass, arrayClass)).toBe(false);
+})
+
+test('isSubclassOfClass', () => {
+    expect(session.isSubclassOfClass(arrayClass, collectionClass)).toBe(true);
+    expect(session.isSubclassOfClass(collectionClass, arrayClass)).toBe(false);
+})
+
+test('oopIsSpecial', () => {
+    expect(session.oopIsSpecial(nil)).toBe(true);
+    expect(session.oopIsSpecial(globals)).toBe(false);
+})
+
+test('objExists', () => {
+    expect(session.objExists(nil)).toBe(true);
+    expect(session.objExists(nil + 1)).toBe(false);
 })
 
 test('execute', () => {
@@ -324,6 +354,43 @@ test('oopToDouble', () => {
     const oop = '9151314442816847878';
     const double = session.oopToDouble(oop);
     expect(double).toBe(1.0);
+})
+
+test('i64ToOop', () => {
+    const oop = session.i64ToOop(5);
+    expect(oop).toBe(42);
+})
+
+test('oopToI64', () => {
+    expect(session.oopToI64(42)).toBe(5); 
+})
+
+test('newObj', () => {
+    const obj = session.newObj(arrayClass);
+    expect(session.isKindOf(obj, arrayClass)).toBe(true);
+})
+
+test('newByteArray', () => {
+    let obj = session.newByteArray();
+    expect(session.isKindOf(obj, byteArrayClass)).toBe(true);
+    expect(session.fetchSize(obj)).toBe(0);
+    obj = session.newByteArray('abc\0xyz');
+    expect(session.fetchSize(obj)).toBe(7);
+    obj = session.newByteArray('abc\0xyz', 3);
+    expect(session.fetchSize(obj)).toBe(3);
+})
+
+test('newString', () => {
+    let obj = session.newString();
+    expect(session.isKindOf(obj, stringClass)).toBe(true);
+    expect(session.fetchSize(obj)).toBe(0);
+    obj = session.newString('abc\0xyz');
+    expect(session.fetchSize(obj)).toBe(3);
+})
+
+test('newSymbol', () => {
+    let obj = session.newSymbol('Array');
+    expect(session.isKindOf(obj, symbolClass)).toBe(true);
 })
 
 test('logout', () => {

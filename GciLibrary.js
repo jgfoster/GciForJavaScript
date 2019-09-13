@@ -77,7 +77,11 @@ GciLibrary = (path) => {
         'GciTsFetchSpecialClass'    : [ OopType,    [ OopType ] ],
         'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', pGciErrSType ] ],
+        'GciTsI64ToOop'             : [ OopType,    [ GciSessionType, 'int64', pGciErrSType ] ],
         'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
+        'GciTsIsKindOfClass'        : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
+        'GciTsIsSubclassOf'         : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
+        'GciTsIsSubclassOfClass'    : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsLogin'                : [ GciSessionType, [ 
                                         'string', // const char *StoneNameNrs
                                         'string', // const char *HostUserId
@@ -91,9 +95,15 @@ GciLibrary = (path) => {
                                         'pointer' // GciErrSType *err
                                     ] ],
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
+        'GciTsNewByteArray'         : [ OopType,    [ GciSessionType, 'string', 'int32', pGciErrSType ] ],
+        'GciTsNewObj'               : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
+        'GciTsNewString'            : [ OopType,    [ GciSessionType, 'string', 'int32', pGciErrSType ] ],
+        'GciTsNewSymbol'            : [ OopType,    [ GciSessionType, 'string', pGciErrSType ] ],
+        'GciTsObjExists'            : [ 'bool',     [ GciSessionType, OopType ] ],
         'GciTsOopIsSpecial'         : [ 'bool',     [ OopType ] ],
         'GciTsOopToChar'            : [ 'int',      [ OopType ] ],
         'GciTsOopToDouble'          : [ 'bool',     [ GciSessionType, OopType, 'pointer', pGciErrSType ] ],
+        'GciTsOopToI64'             : [ 'bool',     [ GciSessionType, OopType, 'pointer', pGciErrSType ] ],
         'GciTsPerform'              : [ OopType,    [ 
                                         GciSessionType, 
                                         OopType,    // receiver
