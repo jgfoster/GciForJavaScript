@@ -53,6 +53,15 @@ class GciSession {
         }
     }
 
+    compileMethod(source, aClass, category = OOP_NIL, symbolList = OOP_NIL, overrideSelector = OOP_NIL, compileFlags = 0, environmentId = 0) {
+        const sourceOop = this.newString(source);
+        const oop = this.gci.GciTsCompileMethod(this.session, sourceOop, aClass, category, symbolList, overrideSelector, compileFlags, environmentId, this.error.ref());
+        if (oop === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return oop;
+    }
+
     continueWith(gsProcessOop, replaceTopOfStack = OOP_ILLEGAL) {
         const oop = this.gci.GciTsContinueWith(this.session, gsProcessOop, replaceTopOfStack, null, 0, this.error.ref());
         if (oop === OOP_ILLEGAL) {
@@ -287,6 +296,12 @@ class GciSession {
             buffer.writeInt32LE(Math.floor(oop / 0x100000000), i * 8 + 4);
         }
         if (!this.gci.GciTsReleaseObjs(this.session, buffer, oopArray.length, this.error.ref())) {
+            throw this.error;
+        }
+    }
+
+    removeAllMethods(classOop) {
+        if (!this.gci.GciTsClassRemoveAllMethods(this.session, classOop, this.error.ref())) {
             throw this.error;
         }
     }

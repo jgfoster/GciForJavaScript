@@ -198,7 +198,7 @@ test('GciTsEncrypt', () => {
         error.ref() // GciErrSType *err
     );
     expect(session === 0).toBe(false);
-    expect(gci.GciTsLogout(session, error.ref()));
+    expect(gci.GciTsLogout(session, error.ref())).toBe(true);
     expect(error.number() ).toBe(0);
   });
 

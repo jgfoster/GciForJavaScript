@@ -72,7 +72,7 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ### Table 7.4 Functions for Compiling and Executing Smalltalk Code in the Database
 
 ```C
-    OopType    GciTsCompileMethod(GciSession sess, ...);
+✓   OopType    GciTsCompileMethod(GciSession sess, ...);
 ✓   BoolType   GciTsProtectMethods(GciSession sess, BoolType mode, GciErrSType *err);
     BoolType   GciTsClassRemoveAllMethods(GciSession sess, ...);
 ✓   OopType    GciTsExecute(GciSession sess, ...);

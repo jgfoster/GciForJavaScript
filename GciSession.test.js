@@ -104,20 +104,10 @@ test('isCallInProgress', () => {
 })
 
 test('trace', () => {
-    let error, flag0, flag1, flag2, flag3;
-    try {
-        flag0 = session.trace(1);
-        flag1 = session.trace(2);
-        flag2 = session.trace(3);
-        flag3 = session.trace(0);
-    } catch (e) {
-        error = e;
-    }
-    expect(error).toBe(undefined);
-    expect(flag0).toBe(0);
-    expect(flag1).toBe(1);
-    expect(flag2).toBe(2);
-    expect(flag3).toBe(3);
+    expect(session.trace(1)).toBe(0);
+    expect(session.trace(2)).toBe(1);
+    expect(session.trace(3)).toBe(2);
+    expect(session.trace(0)).toBe(3);
 })
 
 test('resolveSymbol', () => {
@@ -406,6 +396,24 @@ test('object bitmaps', () => {
     expect(session.execute(string)).toBe(trueOop);
     session.releaseObjs([ oop ]);
     expect(session.execute(string)).toBe(falseOop);
+})
+
+test('compiling and removing methods', () => {
+    let string = 'Object subclass: \'TestClass\' instVarNames: #() inDictionary: UserGlobals';
+    const classOop = session.execute(string);
+    string = 'foo ^5';
+    session.compileMethod(string, classOop);
+    expect(session.execute('TestClass new foo')).toBe(42);
+    /* doesn't seem to work!
+    let error, result;
+    session.removeAllMethods(classOop);
+    try {
+        result = session.execute('TestClass new foo');
+    } catch (e) {
+        error = e;
+    }
+    expect(error.number().toBe(42);
+    */
 })
 
 test('logout', () => {
