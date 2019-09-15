@@ -121,6 +121,48 @@ class GciSession {
         return result;
     }
 
+    fetchUnicode(oop) {
+        let unicodeBuffer = Buffer.alloc(0);
+        const sizeBuffer = Buffer.alloc(8);
+        let actualSize = this.gci.GciTsFetchUnicode(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        const lowWord = sizeBuffer.readInt32LE(0);
+        const highWord = sizeBuffer.readInt32LE(4);
+        const requiredSize = highWord * 0x10000 + lowWord;
+        unicodeBuffer = Buffer.alloc(requiredSize * 2);
+        actualSize = this.gci.GciTsFetchUnicode(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        if (actualSize != requiredSize) { 
+            throw new Error('Unicode conversion error');
+        }
+        return unicodeBuffer.toString('utf16le');
+    }
+
+    fetchUtf8(oop) {
+        let unicodeBuffer = Buffer.alloc(0);
+        const sizeBuffer = Buffer.alloc(8);
+        let actualSize = this.gci.GciTsFetchUtf8(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        const lowWord = sizeBuffer.readInt32LE(0);
+        const highWord = sizeBuffer.readInt32LE(4);
+        const requiredSize = highWord * 0x10000 + lowWord;
+        unicodeBuffer = Buffer.alloc(requiredSize * 2);
+        actualSize = this.gci.GciTsFetchUtf8(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        if (actualSize != requiredSize) { 
+            throw new Error('Unicode conversion error');
+        }
+        return unicodeBuffer.toString('utf8');
+    }
+
     fetchVaryingSize(oop) {
         const size = this.gci.GciTsFetchVaryingSize(this.session, oop, this.error.ref());
         if (size === -1) {
@@ -216,6 +258,23 @@ class GciSession {
 
     newSymbol(bytes) {
         const result = this.gci.GciTsNewSymbol(this.session, bytes, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
+    newUnicodeString(string) {
+        const buffer = Buffer.from(string, 'utf16le');
+        const result = this.gci.GciTsNewUnicodeString_(this.session, buffer, string.length, this.error.ref());
+        if (result === OOP_ILLEGAL) {
+            throw this.error;
+        }
+        return result;
+    }
+
+    newUtf8String(bytes) {
+        const result = this.gci.GciTsNewUtf8String_(this.session, bytes, bytes.length, this.error.ref());
         if (result === OOP_ILLEGAL) {
             throw this.error;
         }
@@ -340,6 +399,14 @@ class GciSession {
         }
     }
 
+    trace(level) {
+        const flag = this.gci.GciTsGemTrace(this.session, level, this.error.ref());
+        if (flag === -1) {
+            throw this.error;
+        }
+        return flag;
+    }
+
     version() {
         const maxStringLength = 200;
         const theStringBuffer = Buffer.alloc(maxStringLength);
@@ -353,13 +420,6 @@ class GciSession {
         return theString;
     }
 
-    trace(level) {
-        const flag = this.gci.GciTsGemTrace(this.session, level, this.error.ref());
-        if (flag === -1) {
-            throw this.error;
-        }
-        return flag;
-    }
 }
 
 module.exports = { GciSession };

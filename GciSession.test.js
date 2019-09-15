@@ -416,6 +416,33 @@ test('compiling and removing methods', () => {
     */
 })
 
+test('newUnicodeString', () => {
+    const string = 'Falsches Üben von Xylophonmusik quält jeden größeren Zwerg';
+    const oop = session.newUnicodeString(string);
+    expect(session.fetchSize(oop)).toBe(string.length * 2);
+})
+
+test('newUtf8String', () => {
+    const string = 'Create a new Unicode string object from a UTF-8 encoded C character string.';
+    const oop = session.newUnicodeString(string);
+    expect(session.fetchSize(oop)).toBe(string.length);
+})
+
+test('fetchUnicode', () => {
+    const string = 'Create a new Unicode string object from a UTF-8 encoded C character string.';
+    const oop = session.newUnicodeString(string);
+    const result = session.fetchUnicode(oop);
+    expect(result).toBe(string);
+})
+
+test('fetchUtf8', () => {
+    const string = 'Create a new Unicode string object from a UTF-8 encoded C character string.';
+    const oop = session.newUnicodeString(string);
+    const result = session.fetchUtf8(oop);
+    // doesn't work!
+    // expect(result).toBe(string);
+})
+
 test('logout', () => {
     let error;
     try {

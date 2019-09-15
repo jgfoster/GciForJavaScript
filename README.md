@@ -74,7 +74,6 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ```C
 ✓   OopType    GciTsCompileMethod(GciSession sess, ...);
 ✓   BoolType   GciTsProtectMethods(GciSession sess, BoolType mode, GciErrSType *err);
-    BoolType   GciTsClassRemoveAllMethods(GciSession sess, ...);
 ✓   OopType    GciTsExecute(GciSession sess, ...);
 ✓   OopType    GciTsExecute_(GciSession sess, ...);
 ✓   ssize_t    GciTsExecuteFetchBytes(GciSession sess, ...);
@@ -97,10 +96,9 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ✓   OopType    GciTsNewByteArray(GciSession sess, ...);
 ✓   OopType    GciTsNewString_(GciSession sess, ...);
 ✓   OopType    GciTsNewSymbol(GciSession sess, ...);
-    OopType    GciTsNewUnicodeString_(GciSession sess, ...);
-    OopType    GciTsNewUtf8String_(GciSession sess, ...);
-    int64      GciTsFetchUnicode(GciSession sess, ...);
-    int64      GciTsFetchUtf8(GciSession sess, ...);
+✓   OopType    GciTsNewUnicodeString_(GciSession sess, ...);
+✓   OopType    GciTsNewUtf8String_(GciSession sess, ...);
+✓   int64      GciTsFetchUnicode(GciSession sess, ...);
 ```
 
 ### Table 7.7 Functions for Converting Objects and Values
@@ -111,8 +109,6 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ✓   int        GciTsOopToChar(OopType oop);
 ✓   OopType    GciTsCharToOop(uint ch);
 ✓   OopType    GciTsDoubleToSmallDouble(double aFloat);
-    BoolType   GciUtf8To8bit(const char* src, char *dest, ssize_t destSize);
-    ssize_t    GciNextUtf8Character(const char* src, size_t len, uint *chOut);
 ✓   OopType    GciI32ToOop(int arg);
 ✓   OopType    GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err);
 ✓   BoolType   GciTsOopToDouble(GciSession sess, OopType oop, ...);
@@ -174,10 +170,22 @@ GciTs offers a variety of `Fork` functions that take a callback. But since `node
 
 ### String
 
-The following are deprecated in favor of the underscore version.
+The following are deprecated in favor of the underscore version or provide UTF-8 conversion that can be done in JavaScript.
 
 ```C
     OopType    GciTsNewString(GciSession sess, ...);
     OopType    GciTsNewUnicodeString(GciSession sess, ...);
     OopType    GciTsNewUtf8String(GciSession sess, ...);
+    BoolType   GciUtf8To8bit(const char* src, char *dest, ssize_t destSize);
+    ssize_t    GciNextUtf8Character(const char* src, size_t len, uint *chOut);
+
+```
+
+### GCI Errors
+
+The following do not seem to work.
+
+```C
+    BoolType   GciTsClassRemoveAllMethods(GciSession sess, ...);
+    int64      GciTsFetchUtf8(GciSession sess, ...);
 ```
