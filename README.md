@@ -128,10 +128,10 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ### Table 7.9 Structural Access Functions
 
 ```C
-    int64      GciTsFetchBytes(GciSession sess, ...);
-    int64      GciTsFetchChars(GciSession sess, ...);
-    int64      GciTsFetchUtf8Bytes(GciSession sess, ...);
-    BoolType   GciTsStoreBytes(GciSession sess, ...);
+✓   int64      GciTsFetchBytes(GciSession sess, ...);
+✓   int64      GciTsFetchChars(GciSession sess, ...);
+✓   int64      GciTsFetchUtf8Bytes(GciSession sess, ...);
+✓   BoolType   GciTsStoreBytes(GciSession sess, ...);
     int        GciTsFetchOops(GciSession sess, ...);
     BoolType   GciTsStoreOops(GciSession sess, ...);
     int        GciTsRemoveOopsFromNsc(GciSession sess, ...);

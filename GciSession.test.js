@@ -436,11 +436,41 @@ test('fetchUnicode', () => {
 })
 
 test('fetchUtf8', () => {
-    const string = 'Create a new Unicode string object from a UTF-8 encoded C character string.';
+    const string = 'Falsches Üben von Xylophonmusik quält jeden größeren Zwerg';
     const oop = session.newUnicodeString(string);
     const result = session.fetchUtf8(oop);
     // doesn't work!
     // expect(result).toBe(string);
+})
+
+test('fetchUtf8Bytes', () => {
+    const string = 'Falsches Üben von Xylophonmusik quält jeden größeren Zwerg';
+    const oop = session.newUnicodeString(string);
+    const result = session.fetchUtf8Bytes(oop);
+    // doesn't work!
+    expect(result).toBe(string);
+})
+
+test('fetchBytes', () => {
+    const bytes = Buffer.from('Fetch multiple bytes from an indexed byte object.');
+    const oop = session.newByteArray(bytes);
+    const result = session.fetchBytes(oop);
+    expect(result).toStrictEqual(bytes);
+})
+
+test('fetchChars', () => {
+    const string = 'Fetch multiple ASCII characters from an indexed byte object.';
+    const oop = session.newString(string);
+    const result = session.fetchChars(oop);
+    expect(result).toStrictEqual(string);
+})
+
+test('storeBytes', () => {
+    const string = 'abcdefg';
+    const oop = session.newString(string);
+    session.storeBytes(Buffer.from('CDEXXX'), oop, stringClass, startIndex = 2, numBytes = 3);
+    const result = session.fetchChars(oop);
+    expect(result).toStrictEqual('abCDEfg');
 })
 
 test('logout', () => {

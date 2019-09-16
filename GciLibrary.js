@@ -75,11 +75,14 @@ GciLibrary = (path) => {
                                         'uint64',   // ssize_t maxResultSize
                                         'pointer'   // GciErrSType *err
                                     ] ],
+        'GciTsFetchBytes'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
+        'GciTsFetchChars'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
         'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsFetchSpecialClass'    : [ OopType,    [ OopType ] ],
         'GciTsFetchUnicode'         : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],
         'GciTsFetchUtf8'            : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],
+        'GciTsFetchUtf8Bytes'       : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', 'pointer', pGciErrSType, 'int32' ] ],
         'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', pGciErrSType ] ],
         'GciTsI64ToOop'             : [ OopType,    [ GciSessionType, 'int64', pGciErrSType ] ],
@@ -139,6 +142,7 @@ GciLibrary = (path) => {
         'GciTsResolveSymbolObj'     : [ OopType,    [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsSaveObjs'             : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
+        'GciTsStoreBytes'           : [ 'bool',     [ GciSessionType, OopType, 'int64', 'pointer', 'int64', OopType, pGciErrSType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
 }

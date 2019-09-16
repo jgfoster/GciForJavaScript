@@ -87,10 +87,28 @@ class GciSession {
         return oop;
     }
 
-    executeFetchBytes(string, expectedSize) {
+    executeFetchBytes(string, expectedSize = 1024) {
         const buffer = Buffer.alloc(expectedSize);
         const actualSize = this.gci.GciTsExecuteFetchBytes(this.session, string, string.length, OOP_CLASS_STRING, 
             OOP_ILLEGAL, OOP_NIL, buffer, buffer.length, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        return buffer.toString('utf8', 0, actualSize);
+    }
+
+    fetchBytes(oop, startIndex = 0, expectedSize = 1024) {
+        const buffer = Buffer.alloc(expectedSize);
+        const actualSize = this.gci.GciTsFetchBytes(this.session, oop, startIndex + 1, buffer, buffer.length, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        return buffer.slice(0, actualSize);
+    }
+
+    fetchChars(oop, startIndex = 0, expectedSize = 1024) {
+        const buffer = Buffer.alloc(expectedSize);
+        const actualSize = this.gci.GciTsFetchChars(this.session, oop, startIndex + 1, buffer, buffer.length, this.error.ref());
         if (actualSize === -1) {
             throw this.error;
         }
@@ -142,7 +160,7 @@ class GciSession {
         return unicodeBuffer.toString('utf16le');
     }
 
-    fetchUtf8(oop) {
+    fetchUtf8(oop) {    // It seems that this doesn't work!
         let unicodeBuffer = Buffer.alloc(0);
         const sizeBuffer = Buffer.alloc(8);
         let actualSize = this.gci.GciTsFetchUtf8(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
@@ -161,6 +179,21 @@ class GciSession {
             throw new Error('Unicode conversion error');
         }
         return unicodeBuffer.toString('utf8');
+    }
+
+    fetchUtf8Bytes(oop, startIndex = 0, expectedSize = 1024) {
+        const utf8Buffer = Buffer.alloc(expectedSize);
+        const oopBuffer = Buffer.alloc(8);
+        const actualSize = this.gci.GciTsFetchUtf8Bytes(this.session, oop, startIndex + 1, 
+            utf8Buffer, utf8Buffer.length, oopBuffer, this.error.ref(), 0 /* GCI_UTF8_FetchNormal */);
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        const lowWord = oopBuffer.readInt32LE(0);
+        const highWord = oopBuffer.readInt32LE(4);
+        const newOop = highWord * 0x10000 + lowWord;
+        this.releaseObjs([newOop]);
+        return utf8Buffer.toString('utf8', 0, actualSize);
     }
 
     fetchVaryingSize(oop) {
@@ -395,6 +428,12 @@ class GciSession {
 
     softBreak() {
         if (!this.gci.GciTsBreak(this.session, false, this.error.ref())) {
+            throw this.error;
+        }
+    }
+
+    storeBytes(bytes, oopObject, oopClass, startIndex = 0, numBytes = bytes.length) {
+        if (!this.gci.GciTsStoreBytes(this.session, oopObject, startIndex + 1, bytes, numBytes, oopClass, this.error.ref())) {
             throw this.error;
         }
     }
