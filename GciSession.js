@@ -123,6 +123,21 @@ class GciSession {
         return classOop;
     }
 
+    fetchOops(theObject, startIndex = 0, numOops = 1) {
+        const buffer = Buffer.alloc(numOops * 8);
+        let actualSize = this.gci.GciTsFetchOops(this.session, theObject, startIndex + 1, buffer, numOops, this.error.ref());
+        if (actualSize === -1) {
+            throw this.error;
+        }
+        const array = new Array(actualSize);
+        for (let i = 0; i < actualSize; i++) {
+            const lowWord = buffer.readInt32LE(i * 8 + 0);
+            const highWord = buffer.readInt32LE(i * 8 + 4);
+            array[i] = highWord * 0x10000 + lowWord;
+        }
+        return array;
+    }
+
     fetchSize(oop) {
         const size = this.gci.GciTsFetchSize(this.session, oop, this.error.ref());
         if (size === -1) {

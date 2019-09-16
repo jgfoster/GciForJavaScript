@@ -78,6 +78,7 @@ GciLibrary = (path) => {
         'GciTsFetchBytes'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
         'GciTsFetchChars'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
         'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
+        'GciTsFetchOops'            : [ 'int32',    [ GciSessionType, OopType, 'int64', 'pointer', 'int32', pGciErrSType ] ],
         'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsFetchSpecialClass'    : [ OopType,    [ OopType ] ],
         'GciTsFetchUnicode'         : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],

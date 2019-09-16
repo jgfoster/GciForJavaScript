@@ -465,6 +465,16 @@ test('fetchChars', () => {
     expect(result).toStrictEqual(string);
 })
 
+test('fetchOops', () => {
+    const arrayOop = session.execute('#(0 true false nil 1)');
+    let array = session.fetchOops(arrayOop);
+    expect(array.length).toBe(1);
+    expect(array[0]).toBe(session.i64ToOop(0));
+    array = session.fetchOops(arrayOop, 1, 3);
+    expect(array.length).toBe(3);
+    expect(array).toStrictEqual([trueOop, falseOop, nil]);
+})
+
 test('storeBytes', () => {
     const string = 'abcdefg';
     const oop = session.newString(string);

@@ -132,7 +132,7 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 ✓   int64      GciTsFetchChars(GciSession sess, ...);
 ✓   int64      GciTsFetchUtf8Bytes(GciSession sess, ...);
 ✓   BoolType   GciTsStoreBytes(GciSession sess, ...);
-    int        GciTsFetchOops(GciSession sess, ...);
+✓   int        GciTsFetchOops(GciSession sess, ...);
     BoolType   GciTsStoreOops(GciSession sess, ...);
     int        GciTsRemoveOopsFromNsc(GciSession sess, ...);
     int64      GciTsFetchObjInfo(GciSession sess, OopType objId, ...);
