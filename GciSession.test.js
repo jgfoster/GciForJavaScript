@@ -478,9 +478,33 @@ test('fetchOops', () => {
 test('storeBytes', () => {
     const string = 'abcdefg';
     const oop = session.newString(string);
-    session.storeBytes(Buffer.from('CDEXXX'), oop, stringClass, startIndex = 2, numBytes = 3);
+    session.storeBytes('CDEXXX', oop, stringClass, startIndex = 2, numBytes = 3);
     const result = session.fetchChars(oop);
     expect(result).toStrictEqual('abCDEfg');
+})
+
+test('removeOopsFromNsc', () => {
+    const nsc = session.execute('(IdentitySet with: true with: false with: 5)');
+    expect(session.fetchVaryingSize(nsc)).toBe(3);
+    expect(session.removeOopsFromNsc(nsc, [trueOop])).toBe(true);
+    expect(session.removeOopsFromNsc(nsc, [trueOop, falseOop])).toBe(false);
+    expect(session.fetchVaryingSize(nsc)).toBe(1);
+})
+
+test('fetchObjInfo', () => {
+    const objInfo = session.fetchObjInfo(globals);
+    expect(objInfo.objId()).toBe(globals);
+    expect(objInfo.objClass()).toBe(symbolDictionaryClass);
+    expect(objInfo.access()).toBe(2);       // DataCurator can write Globals?
+    expect(objInfo.isInvariant()).toBe(0);  // want this to return a Boolean
+    expect(objInfo.objImpl()).toBe(0);
+})
+
+test('getFreeOops', () => {
+    const array = session.getFreeOops(4);
+    expect(array.length).toBe(4);
+    expect(array[0] > 0).toBe(true);
+    session.releaseObjs(array);
 })
 
 test('logout', () => {

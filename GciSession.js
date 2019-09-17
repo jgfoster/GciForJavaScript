@@ -4,7 +4,7 @@
  *  GciSession provides a wrapper around GciLibrary
  */
 
-const { GciLibrary, GciErrSType, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING } = require("./GciLibrary");
+const { GciLibrary, GciErrSType, GciTsObjInfo, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING } = require("./GciLibrary");
 
 class GciSession {
     constructor(login) {
@@ -123,6 +123,15 @@ class GciSession {
         return classOop;
     }
 
+    fetchObjInfo(objId) {
+        const objInfo = new GciTsObjInfo;
+        const result = this.gci.GciTsFetchObjInfo(this.session, objId, false, objInfo.ref(), null, 0, this.error.ref());
+        if (result === -1) {
+            throw this.error;
+        }
+        return objInfo;
+    }
+
     fetchOops(theObject, startIndex = 0, numOops = 1) {
         const buffer = Buffer.alloc(numOops * 8);
         let actualSize = this.gci.GciTsFetchOops(this.session, theObject, startIndex + 1, buffer, numOops, this.error.ref());
@@ -131,9 +140,7 @@ class GciSession {
         }
         const array = new Array(actualSize);
         for (let i = 0; i < actualSize; i++) {
-            const lowWord = buffer.readInt32LE(i * 8 + 0);
-            const highWord = buffer.readInt32LE(i * 8 + 4);
-            array[i] = highWord * 0x10000 + lowWord;
+            array[i] = buffer.readIntLE(i * 8, 6);
         }
         return array;
     }
@@ -161,9 +168,7 @@ class GciSession {
         if (actualSize === -1) {
             throw this.error;
         }
-        const lowWord = sizeBuffer.readInt32LE(0);
-        const highWord = sizeBuffer.readInt32LE(4);
-        const requiredSize = highWord * 0x10000 + lowWord;
+        const requiredSize = sizeBuffer.readIntLE(0, 6);
         unicodeBuffer = Buffer.alloc(requiredSize * 2);
         actualSize = this.gci.GciTsFetchUnicode(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
         if (actualSize === -1) {
@@ -182,9 +187,7 @@ class GciSession {
         if (actualSize === -1) {
             throw this.error;
         }
-        const lowWord = sizeBuffer.readInt32LE(0);
-        const highWord = sizeBuffer.readInt32LE(4);
-        const requiredSize = highWord * 0x10000 + lowWord;
+        const requiredSize = sizeBuffer.readIntLE(0, 6);
         unicodeBuffer = Buffer.alloc(requiredSize * 2);
         actualSize = this.gci.GciTsFetchUtf8(this.session, oop, unicodeBuffer, unicodeBuffer.length, sizeBuffer, this.error.ref());
         if (actualSize === -1) {
@@ -204,9 +207,7 @@ class GciSession {
         if (actualSize === -1) {
             throw this.error;
         }
-        const lowWord = oopBuffer.readInt32LE(0);
-        const highWord = oopBuffer.readInt32LE(4);
-        const newOop = highWord * 0x10000 + lowWord;
+        const newOop = oopBuffer.readIntLE(0, 6);
         this.releaseObjs([newOop]);
         return utf8Buffer.toString('utf8', 0, actualSize);
     }
@@ -217,6 +218,19 @@ class GciSession {
             throw this.error;
         }
         return size;
+    }
+
+    getFreeOops(numOopsRequested) {
+        const buffer = Buffer.alloc(numOopsRequested * 8);
+        const count = this.gci.GciTsGetFreeOops(this.session, buffer, numOopsRequested, this.error.ref());
+        if (count === -1) {
+            throw this.error;
+        }
+        const array = Array(count);
+        for (let i = 0; i < count; i++) {
+            array[i] = buffer.readIntLE(i * 8, 6);
+        }
+        return array;
     }
 
     hardBreak() {
@@ -398,9 +412,7 @@ class GciSession {
     releaseObjs(oopArray) {
         const buffer = Buffer.alloc(oopArray.length * 8);
         for (let i = 0; i < oopArray.length; i++) {
-            const oop = oopArray[i];
-            buffer.writeInt32LE(oop % 0x100000000, i * 8);
-            buffer.writeInt32LE(Math.floor(oop / 0x100000000), i * 8 + 4);
+            buffer.writeIntLE(oopArray[i], i * 8, 6);
         }
         if (!this.gci.GciTsReleaseObjs(this.session, buffer, oopArray.length, this.error.ref())) {
             throw this.error;
@@ -412,6 +424,18 @@ class GciSession {
             throw this.error;
         }
     }
+
+    removeOopsFromNsc(theNsc, theOops) {
+        const buffer = Buffer.alloc(theOops.length * 8);
+        for (let i = 0; i < theOops.length; i++) {
+            buffer.writeIntLE(theOops[i], i * 8, 6);
+        }
+        const result = this.gci.GciTsRemoveOopsFromNsc(this.session, theNsc, buffer, theOops.length, this.error.ref());
+        if (result === -1) {
+            throw this.error;
+        }
+        return result == 1;
+   }
 
     resolveSymbol(string, symbolList = OOP_NIL) {
         const oop = this.gci.GciTsResolveSymbol(this.session, string, symbolList, this.error.ref());
@@ -432,9 +456,7 @@ class GciSession {
     saveObjs(oopArray) {
         const buffer = Buffer.alloc(oopArray.length * 8);
         for (let i = 0; i < oopArray.length; i++) {
-            const oop = oopArray[i];
-            buffer.writeInt32LE(oop % 0x100000000, i * 8);
-            buffer.writeInt32LE(Math.floor(oop / 0x100000000), i * 8 + 4);
+            buffer.writeIntLE(oopArray[i], i * 8, 6);
         }
         if (!this.gci.GciTsSaveObjs(this.session, buffer, oopArray.length, this.error.ref())) {
             throw this.error;
@@ -448,7 +470,13 @@ class GciSession {
     }
 
     storeBytes(bytes, oopObject, oopClass, startIndex = 0, numBytes = bytes.length) {
-        if (!this.gci.GciTsStoreBytes(this.session, oopObject, startIndex + 1, bytes, numBytes, oopClass, this.error.ref())) {
+        let buffer;
+        if (typeof bytes == 'Buffer') {
+            buffer = bytes;
+        } else {
+            buffer = Buffer.from(bytes);
+        }
+        if (!this.gci.GciTsStoreBytes(this.session, oopObject, startIndex + 1, buffer, numBytes, oopClass, this.error.ref())) {
             throw this.error;
         }
     }

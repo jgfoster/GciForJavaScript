@@ -26,6 +26,23 @@ class GciErrSType {       // gci.ht
     reason()    { return this.buffer.toString('utf8', 1138, 1025).split('\0').shift() }
 }
 
+class GciTsObjInfo {        // gcits.hf
+    constructor()   { this.buffer = Buffer.alloc(40);       }   // 36 plus some padding
+    ref()           { return this.buffer;                   }
+    objId()         { return this.buffer.readIntLE(  0, 6); }
+    objClass()      { return this.buffer.readIntLE(  8, 6); }
+    objSize()       { return this.buffer.readIntLE( 16, 6); }
+    namedSize()     { return this.buffer.readIntLE( 24, 4); }
+    access()        { return this.buffer.readIntLE( 28, 4); }
+    securityPolicy(){ return this.buffer.readIntLE( 32, 2); }
+    bits()          { return this.buffer.readIntLE( 34, 2); }
+    isInvariant()   { return this.bits() & 0x08 === 0x08;   }
+    isIndexable()   { return this.bits() & 0x04 === 0x04;   }
+    isPartial()     { return this.bits() & 0x10 === 0x10;   }
+    isOverlayed()   { return this.bits() & 0x20 === 0x20;   }
+    objImpl()       { return this.bits() & 0x03;            }
+}
+
 GciLibrary = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType,    [ 'int'] ], 
@@ -78,14 +95,16 @@ GciLibrary = (path) => {
         'GciTsFetchBytes'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
         'GciTsFetchChars'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
         'GciTsFetchClass'           : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
-        'GciTsFetchOops'            : [ 'int32',    [ GciSessionType, OopType, 'int64', 'pointer', 'int32', pGciErrSType ] ],
+        'GciTsFetchObjInfo'         : [ 'int64',    [ GciSessionType, OopType, 'bool', 'pointer', 'pointer', 'int64', pGciErrSType ] ],
+        'GciTsFetchOops'            : [ 'int',      [ GciSessionType, OopType, 'int64', 'pointer', 'int', pGciErrSType ] ],
         'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsFetchSpecialClass'    : [ OopType,    [ OopType ] ],
         'GciTsFetchUnicode'         : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],
         'GciTsFetchUtf8'            : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],
-        'GciTsFetchUtf8Bytes'       : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', 'pointer', pGciErrSType, 'int32' ] ],
+        'GciTsFetchUtf8Bytes'       : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', 'pointer', pGciErrSType, 'int' ] ],
         'GciTsFetchVaryingSize'     : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsGemTrace'             : [ 'int',      [ GciSessionType, 'int', pGciErrSType ] ],
+        'GciTsGetFreeOops'          : [ 'int',      [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsI64ToOop'             : [ OopType,    [ GciSessionType, 'int64', pGciErrSType ] ],
         'GciTsIsKindOf'             : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsIsKindOfClass'        : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
@@ -104,12 +123,12 @@ GciLibrary = (path) => {
                                         'pointer' // GciErrSType *err
                                     ] ],
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
-        'GciTsNewByteArray'         : [ OopType,    [ GciSessionType, 'string', 'int32', pGciErrSType ] ],
+        'GciTsNewByteArray'         : [ OopType,    [ GciSessionType, 'string', 'int', pGciErrSType ] ],
         'GciTsNewObj'               : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
-        'GciTsNewString'            : [ OopType,    [ GciSessionType, 'string', 'int32', pGciErrSType ] ],
+        'GciTsNewString'            : [ OopType,    [ GciSessionType, 'string', 'int', pGciErrSType ] ],
         'GciTsNewSymbol'            : [ OopType,    [ GciSessionType, 'string', pGciErrSType ] ],
-        'GciTsNewUnicodeString_'    : [ OopType,    [ GciSessionType, 'pointer', 'int32', pGciErrSType ] ],
-        'GciTsNewUtf8String_'       : [ OopType,    [ GciSessionType, 'pointer', 'int32', 'bool', pGciErrSType ] ],
+        'GciTsNewUnicodeString_'    : [ OopType,    [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
+        'GciTsNewUtf8String_'       : [ OopType,    [ GciSessionType, 'pointer', 'int', 'bool', pGciErrSType ] ],
         'GciTsObjExists'            : [ 'bool',     [ GciSessionType, OopType ] ],
         'GciTsOopIsSpecial'         : [ 'bool',     [ OopType ] ],
         'GciTsOopToChar'            : [ 'int',      [ OopType ] ],
@@ -139,6 +158,7 @@ GciLibrary = (path) => {
         'GciTsProtectMethods'       : [ 'bool',     [ GciSessionType, 'bool', pGciErrSType ] ],
         'GciTsReleaseAllObjs'       : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
         'GciTsReleaseObjs'          : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
+        'GciTsRemoveOopsFromNsc'    : [ 'int',      [ GciSessionType, OopType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsResolveSymbol'        : [ OopType,    [ GciSessionType, 'string', OopType, pGciErrSType ] ],
         'GciTsResolveSymbolObj'     : [ OopType,    [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsSaveObjs'             : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
@@ -148,4 +168,4 @@ GciLibrary = (path) => {
     });
 }
 
-module.exports = { GciLibrary, GciErrSType, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING };
+module.exports = { GciLibrary, GciErrSType, GciTsObjInfo, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING };
