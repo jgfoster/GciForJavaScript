@@ -515,9 +515,20 @@ test('traversalBuffer', () => {
     travBuf = session.newTraversalBuffer(2047);     // minimum of 2048
     expect(travBuf.allocatedBytes()).toBe(2048);
     expect(travBuf.usedBytes()).toBe(0);
-    expect(travBuf.firstReport()._address()).toBe(travBuf._address() + 8);
-    expect(travBuf.readLimit  ()._address()).toBe(travBuf._address() + 8);
-    expect(travBuf.writeLimit ()._address()).toBe(travBuf._address() + 8 + 2048);
+    expect(travBuf.firstReport   ()._address()).toBe(travBuf._address() + 8);
+    expect(travBuf.readLimit     ()._address()).toBe(travBuf._address() + 8);
+    expect(travBuf.writeLimit    ()._address()).toBe(travBuf._address() + 8 + 2048);
+    expect(travBuf.firstReportHdr()._address()).toBe(travBuf._address() + 8);
+    expect(travBuf.readLimitHdr  ()._address()).toBe(travBuf._address() + 8);
+    expect(travBuf.writeLimitHdr ()._address()).toBe(travBuf._address() + 8 + 2048);
+    const header = travBuf.firstReportHdr();
+    expect(header.valueBuffSize()).toBe(0);
+    expect(header.namedSize()).toBe(0);
+    expect(header.securityPolicy()).toBe(0);
+    expect(header.objId()).toBe(0);
+    expect(header.oclass()).toBe(0);
+    expect(header.firstOffset()).toBe(0);
+    
 })
 
 test('logout', () => {

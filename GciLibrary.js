@@ -43,12 +43,30 @@ class GciTsObjInfo {        // gcits.hf
     objImpl()       { return this.bits() & 0x03;            }
 }
 
-class GciObjRepSType {
-    constructor(buf){ this.buffer = buf;    }
+class GciObjRepHdrSType {   // gci.ht
+    constructor(buf){ this.buffer = buf; }
+    foo() { return 'bar'; }
     _address()      { return this.buffer.byteOffset; }
+    valueBuffSize() { return this.buffer.readIntLE ( 0, 4); }   // size in bytes of obj's value buff 
+    namedSize()     { return this.buffer.readIntLE ( 4, 2); }   // number of named instVars
+    securityPolicy(){ return this.buffer.readUIntLE( 6, 2); }   // always UNDEFINED_ObjectSecurityPolicyId
+    objId()         { return this.buffer.readIntLE ( 8, 6); }   // OOP of the object
+    oclass()        { return this.buffer.readIntLE (16, 6); }   // OOP of the class of the object
+    firstOffset()   { return this.buffer.readIntLE (24, 6); }   // absolute offset of first instVar in the value buffer
+    _idxSizeBits()  { return this.buffer.readUIntLE(32, 6); }   // 40 bits of size, 8 bits numDynamicIvs, 16 bits ?
 }
 
-class GciTravBufType {
+class GciObjRepSType {      // gci.ht
+    constructor(buf){ this.buffer = buf; }
+    _address()      { return this.buffer.byteOffset; }
+    header()        { return new GciObjRepHdrSType(this.buffer); }
+    bytes()         { return this.buffer.slice(); }
+    oops()          { return this.buffer.slice(); }
+    usedBytes()     { return this.header().usedBytes(); }
+    nextReport()    { return this.header().nextReport(); }
+}
+
+class GciTravBufType {      // gcicmn.ht
     constructor(bodySize = 2048) { 
         if (bodySize < 2048) {
             bodySize = 2048;
@@ -63,12 +81,12 @@ class GciTravBufType {
     allocatedBytes(){ return this.buffer.readUInt32LE(0); }
     usedBytes()     { return this.buffer.readUInt32LE(4); }
     setUsedBytes(i) { this.buffer.writeUInt32LE(i, 4);    }
-    firstReport()   { return new GciObjRepSType(this.buffer.slice(8));  }
+    firstReport()   { return new GciObjRepSType(this.buffer.slice(8)); }
     readLimit()     { return new GciObjRepSType(this.buffer.slice(8 + this.usedBytes())); }
     writeLimit()    { return new GciObjRepSType(this.buffer.slice(8 + this.allocatedBytes())); }
-    firstReportHdr(){ return new GciObjRepHdrSType(this.firstReport()); }
-    readLimitHdr()  { return new GciObjRepHdrSType(this.readLimit());   }
-    writeLimitHdr() { return new GciObjRepHdrSType(this.writeLimit());  }
+    firstReportHdr(){ return this.firstReport().header(); }
+    readLimitHdr()  { return this.readLimit().header();   }
+    writeLimitHdr() { return this.writeLimit().header();  }
 }
 
 GciLibrary = (path) => {
