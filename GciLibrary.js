@@ -43,6 +43,34 @@ class GciTsObjInfo {        // gcits.hf
     objImpl()       { return this.bits() & 0x03;            }
 }
 
+class GciObjRepSType {
+    constructor(buf){ this.buffer = buf;    }
+    _address()      { return this.buffer.byteOffset; }
+}
+
+class GciTravBufType {
+    constructor(bodySize = 2048) { 
+        if (bodySize < 2048) {
+            bodySize = 2048;
+        } else {
+            bodySize = Math.floor((bodySize - 1) / 8) * 8 + 8;  // ensure size is rounded to 8 bytes
+        }
+        this.buffer = Buffer.alloc(bodySize + 8); 
+        this.buffer.writeUInt32LE(bodySize, 0); // uint allocatedBytes; // allocated size of the body
+        this.setUsedBytes(0);
+    }
+    _address()      { return this.buffer.byteOffset; }
+    allocatedBytes(){ return this.buffer.readUInt32LE(0); }
+    usedBytes()     { return this.buffer.readUInt32LE(4); }
+    setUsedBytes(i) { this.buffer.writeUInt32LE(i, 4);    }
+    firstReport()   { return new GciObjRepSType(this.buffer.slice(8));  }
+    readLimit()     { return new GciObjRepSType(this.buffer.slice(8 + this.usedBytes())); }
+    writeLimit()    { return new GciObjRepSType(this.buffer.slice(8 + this.allocatedBytes())); }
+    firstReportHdr(){ return new GciObjRepHdrSType(this.firstReport()); }
+    readLimitHdr()  { return new GciObjRepHdrSType(this.readLimit());   }
+    writeLimitHdr() { return new GciObjRepHdrSType(this.writeLimit());  }
+}
+
 GciLibrary = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType,    [ 'int'] ], 
@@ -164,8 +192,17 @@ GciLibrary = (path) => {
         'GciTsSaveObjs'             : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsStoreBytes'           : [ 'bool',     [ GciSessionType, OopType, 'int64', 'pointer', 'int64', OopType, pGciErrSType ] ],
+/*
+EXTERN_GCI_DEC(BoolType) GciTsStoreTrav(GciSession sess, 
+	GciTravBufType *travBuff, int flag, GciErrSType *err);
+*/
+        'GciTsStoreTrav'            : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
 }
 
-module.exports = { GciLibrary, GciErrSType, GciTsObjInfo, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING };
+module.exports = { 
+    GciLibrary, GciErrSType, GciTsObjInfo, 
+    GciTravBufType, 
+    OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING 
+};

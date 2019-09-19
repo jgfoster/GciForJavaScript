@@ -4,7 +4,11 @@
  *  GciSession provides a wrapper around GciLibrary
  */
 
-const { GciLibrary, GciErrSType, GciTsObjInfo, OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING } = require("./GciLibrary");
+const { 
+    GciLibrary, GciErrSType, GciTsObjInfo, 
+    GciTravBufType,
+    OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING 
+} = require("./GciLibrary");
 
 class GciSession {
     constructor(login) {
@@ -324,6 +328,10 @@ class GciSession {
             throw this.error;
         }
         return result;
+    }
+
+    newTraversalBuffer(size) {
+        return new GciTravBufType(size);
     }
 
     newUnicodeString(string) {

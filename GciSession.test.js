@@ -507,6 +507,19 @@ test('getFreeOops', () => {
     session.releaseObjs(array);
 })
 
+test('traversalBuffer', () => {
+    let travBuf = session.newTraversalBuffer();     // default of 2048
+    expect(travBuf.allocatedBytes()).toBe(2048);
+    travBuf = session.newTraversalBuffer(2049);     // rounded to multiple of 8
+    expect(travBuf.allocatedBytes()).toBe(2056);
+    travBuf = session.newTraversalBuffer(2047);     // minimum of 2048
+    expect(travBuf.allocatedBytes()).toBe(2048);
+    expect(travBuf.usedBytes()).toBe(0);
+    expect(travBuf.firstReport()._address()).toBe(travBuf._address() + 8);
+    expect(travBuf.readLimit  ()._address()).toBe(travBuf._address() + 8);
+    expect(travBuf.writeLimit ()._address()).toBe(travBuf._address() + 8 + 2048);
+})
+
 test('logout', () => {
     let error;
     try {
