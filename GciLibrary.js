@@ -4,108 +4,11 @@
 
 const FFI = require('ffi-napi');
 
-const OOP_ILLEGAL = 1;
-const OOP_NIL = 20;
-const OOP_CLASS_STRING = 74753;
-
 const pGciErrSType = 'pointer';
 const GciSessionType = 'int64';
 const OopType = 'int64';
 
-class GciErrSType {       // gci.ht 
-    constructor() { this.buffer = Buffer.alloc(2200);   }   // 2163 plus some padding
-    ref()       { return this.buffer;                   }
-    category()  { return this.buffer.readIntLE(  0, 6); }   // size is actually 8 bytes, but Buffer only supports 6 bytes before Node.js v12.0.0
-    context()   { return this.buffer.readIntLE(  8, 6); }   // OOP of GsProcess
-    exception() { return this.buffer.readIntLE( 16, 6); }   // OOP of Exception object
-    // args() an array of 10 OopType values
-    number()    { return this.buffer.readIntLE(104, 4); }
-    argCount()  { return this.buffer.readIntLE(108, 4); }
-    fatal()     { return this.buffer.readIntLE(112, 1); }
-    message()   { return this.buffer.toString('utf8',  113, 1025).split('\0').shift() }
-    reason()    { return this.buffer.toString('utf8', 1138, 1025).split('\0').shift() }
-}
-
-class GciTsObjInfo {        // gcits.hf
-    constructor()   { this.buffer = Buffer.alloc(40);       }   // 36 plus some padding
-    ref()           { return this.buffer;                   }
-    objId()         { return this.buffer.readIntLE(  0, 6); }
-    objClass()      { return this.buffer.readIntLE(  8, 6); }
-    objSize()       { return this.buffer.readIntLE( 16, 6); }
-    namedSize()     { return this.buffer.readIntLE( 24, 4); }
-    access()        { return this.buffer.readIntLE( 28, 4); }
-    securityPolicy(){ return this.buffer.readIntLE( 32, 2); }
-    bits()          { return this.buffer.readIntLE( 34, 2); }
-    isInvariant()   { return this.bits() & 0x08 === 0x08;   }
-    isIndexable()   { return this.bits() & 0x04 === 0x04;   }
-    isPartial()     { return this.bits() & 0x10 === 0x10;   }
-    isOverlayed()   { return this.bits() & 0x20 === 0x20;   }
-    objImpl()       { return this.bits() & 0x03;            }
-}
-
-class GciObjRepHdrSType {   // gci.ht
-    constructor(buf){ this.buffer = buf; this.headerSize = 40; }
-    _class() { return 'GciObjRepHdrSType'; }
-    _address()      { return this.buffer.byteOffset; }
-    valueBuffSize() { return this.buffer.readIntLE ( 0, 4); }   // size in bytes of obj's value buff 
-    namedSize()     { return this.buffer.readIntLE ( 4, 2); }   // number of named instVars
-    securityPolicy(){ return this.buffer.readUIntLE( 6, 2); }   // always UNDEFINED_ObjectSecurityPolicyId
-    objId()         { return this.buffer.readIntLE ( 8, 6); }   // OOP of the object
-    oclass()        { return this.buffer.readIntLE (16, 6); }   // OOP of the class of the object
-    firstOffset()   { return this.buffer.readIntLE (24, 6); }   // absolute offset of first instVar in the value buffer
-    _idxSizeBits()  { return this.buffer.readUIntLE(32, 6); }   // 40 bits of size, 8 bits numDynamicIvs, 16 bit flags
-    _setIdxSizeBits(value) 
-                    { this.buffer.writeUIntLE(value, 32, 6); }
-    idxSize()       { return this._idxSizeBits() >> 24; }
-    setIdxSize(size){ this._setIdxSizeBits(size << 24 | (this._idxSizeBits() & 0xFFFFFF)); }
-    setIdxSizeBits(size, bits, nDynamicIvs)
-                    { this._setIdxSizeBits(size << 24 | ((nDynamicIvs & 0xFF) << 16) | (bits & 0xFFFF)); }
-    numDynamicIvs() { return (this._idxSizeBits() >> 16) & 0xFF; }
-    objImpl()       { return this._idxSizeBits() & 0x03; }
-    setObjImpl(v)   { this._setIdxSizeBits((this._idxSizeBits() & ~ 0x03) | (v & 0x03)); }
-    objSize()       { return this.idxSize() + this.namedSize() }
-    clearBits()     { this._setIdxSizeBits(this._idxSizeBits() & ~ 0xFFFF) }
-    usedBytes()     { return this.headerSize + this.valueBuffSize(); }
-    valueBufNumOops()
-                    { return this.valueBuffSize() / 8; }
-    nextReport()    { return new GciObjRepHdrSType(this.buffer.slice(this.usedBytes())); }
-    valueBuffer()   { return this.buffer.slice(this.headerSize); }
-}
-
-class GciObjRepSType {      // gci.ht
-    constructor(buf){ this.buffer = buf; }
-    _address()      { return this.buffer.byteOffset; }
-    header()        { return new GciObjRepHdrSType(this.buffer); }
-    bytes()         { return this.buffer.slice(); }
-    oops()          { return this.buffer.slice(); }
-    usedBytes()     { return this.header().usedBytes(); }
-    nextReport()    { return this.header().nextReport(); }
-}
-
-class GciTravBufType {      // gcicmn.ht
-    constructor(bodySize = 2048) { 
-        if (bodySize < 2048) {
-            bodySize = 2048;
-        } else {
-            bodySize = Math.floor((bodySize - 1) / 8) * 8 + 8;  // ensure size is rounded to 8 bytes
-        }
-        this.buffer = Buffer.alloc(bodySize + 8); 
-        this.buffer.writeUInt32LE(bodySize, 0); // uint allocatedBytes; // allocated size of the body
-        this.setUsedBytes(0);
-    }
-    _address()      { return this.buffer.byteOffset; }
-    allocatedBytes(){ return this.buffer.readUInt32LE(0); }
-    usedBytes()     { return this.buffer.readUInt32LE(4); }
-    setUsedBytes(i) { this.buffer.writeUInt32LE(i, 4);    }
-    firstReport()   { return new GciObjRepSType(this.buffer.slice(8)); }
-    readLimit()     { return new GciObjRepSType(this.buffer.slice(8 + this.usedBytes())); }
-    writeLimit()    { return new GciObjRepSType(this.buffer.slice(8 + this.allocatedBytes())); }
-    firstReportHdr(){ return this.firstReport().header(); }
-    readLimitHdr()  { return this.readLimit().header();   }
-    writeLimitHdr() { return this.writeLimit().header();  }
-}
-
-GciLibrary = (path) => {
+module.exports = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType,    [ 'int'] ], 
         'GciTsAbort'                : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
@@ -130,7 +33,7 @@ GciLibrary = (path) => {
                                         OopType,    // symbolList
                                         'int',      // int flags
                                         'uint16',   // ushort environmentId
-                                        'pointer'   // GciErrSType *err
+                                        pGciErrSType
                                     ] ],
         'GciTsExecute_'             : [ OopType,    [ 
                                         GciSessionType, 
@@ -141,7 +44,7 @@ GciLibrary = (path) => {
                                         OopType,    // symbolList
                                         'int',      // flags
                                         'uint16',   // ushort environmentId
-                                        'pointer'   // GciErrSType *err
+                                        pGciErrSType
                                     ] ],
         'GciTsExecuteFetchBytes'    : [ 'int64',    [ 
                                         GciSessionType, 
@@ -152,7 +55,7 @@ GciLibrary = (path) => {
                                         OopType,    // symbolList
                                         'pointer',  // ByteType *result
                                         'uint64',   // ssize_t maxResultSize
-                                        'pointer'   // GciErrSType *err
+                                        pGciErrSType
                                     ] ],
         'GciTsFetchBytes'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
         'GciTsFetchChars'           : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', pGciErrSType ] ],
@@ -182,7 +85,7 @@ GciLibrary = (path) => {
                                         'string', // const char *gemstonePassword
                                         'uint',   // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
                                         'int',    // int haltOnErrNum
-                                        'pointer' // GciErrSType *err
+                                        pGciErrSType
                                     ] ],
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
         'GciTsNewByteArray'         : [ OopType,    [ GciSessionType, 'string', 'int', pGciErrSType ] ],
@@ -205,7 +108,7 @@ GciLibrary = (path) => {
                                         'int',      // int numArgs
                                         'int',      // int flags
                                         'uint16',   // ushort environmentId
-                                        'pointer'   // GciErrSType *err
+                                        pGciErrSType
                                     ] ],
         'GciTsPerformFetchBytes'    : [ OopType,    [ 
                                         GciSessionType, 
@@ -215,7 +118,7 @@ GciLibrary = (path) => {
                                         'int',      // int numArgs
                                         'pointer',  // ByteType *result
                                         'uint64',   // ssize_t  maxResultSize
-                                        'pointer'   // GciErrSType *err 
+                                        pGciErrSType 
                                     ] ],
         'GciTsProtectMethods'       : [ 'bool',     [ GciSessionType, 'bool', pGciErrSType ] ],
         'GciTsReleaseAllObjs'       : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
@@ -226,17 +129,7 @@ GciLibrary = (path) => {
         'GciTsSaveObjs'             : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsStoreBytes'           : [ 'bool',     [ GciSessionType, OopType, 'int64', 'pointer', 'int64', OopType, pGciErrSType ] ],
-/*
-EXTERN_GCI_DEC(BoolType) GciTsStoreTrav(GciSession sess, 
-	GciTravBufType *travBuff, int flag, GciErrSType *err);
-*/
         'GciTsStoreTrav'            : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
 }
-
-module.exports = { 
-    GciLibrary, GciErrSType, GciTsObjInfo, 
-    GciTravBufType, 
-    OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING 
-};

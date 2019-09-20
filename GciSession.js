@@ -4,11 +4,11 @@
  *  GciSession provides a wrapper around GciLibrary
  */
 
-const { 
-    GciLibrary, GciErrSType, GciTsObjInfo, 
-    GciTravBufType,
-    OOP_ILLEGAL, OOP_NIL, OOP_CLASS_STRING 
-} = require("./GciLibrary");
+const GciErrSType    = require('./GciErrSType');
+const GciLibrary     = require("./GciLibrary");
+const GciTravBufType = require('./GciTravBufType');
+const GciTsObjInfo   = require('./GciTsObjInfo');
+require("./GciConstants");
 
 class GciSession {
     constructor(login) {
@@ -57,18 +57,18 @@ class GciSession {
         }
     }
 
-    compileMethod(source, aClass, category = OOP_NIL, symbolList = OOP_NIL, overrideSelector = OOP_NIL, compileFlags = 0, environmentId = 0) {
+    compileMethod(source, aClass, category = OOP.nil, symbolList = OOP.nil, overrideSelector = OOP.nil, compileFlags = 0, environmentId = 0) {
         const sourceOop = this.newString(source);
         const oop = this.gci.GciTsCompileMethod(this.session, sourceOop, aClass, category, symbolList, overrideSelector, compileFlags, environmentId, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        if (oop === OOP.ILLEGAL) {
             throw this.error;
         }
         return oop;
     }
 
-    continueWith(gsProcessOop, replaceTopOfStack = OOP_ILLEGAL) {
+    continueWith(gsProcessOop, replaceTopOfStack = OOP.ILLEGAL) {
         const oop = this.gci.GciTsContinueWith(this.session, gsProcessOop, replaceTopOfStack, null, 0, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        if (oop === OOP.ILLEGAL) {
             throw this.error;
         }
         return oop;
@@ -76,16 +76,16 @@ class GciSession {
 
     doubleToOop(double) {
         const oop = this.gci.GciTsDoubleToOop(this.session, double, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        if (oop === OOP.ILLEGAL) {
             throw this.error;
         }
         return oop;
     }
 
     execute(string) {
-        const oop = this.gci.GciTsExecute_(this.session, string, string.length, OOP_CLASS_STRING, 
-            OOP_ILLEGAL, OOP_NIL, 0, 0, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        const oop = this.gci.GciTsExecute_(this.session, string, string.length, OOP.String, 
+            OOP.ILLEGAL, OOP.nil, 0, 0, this.error.ref());
+        if (oop === OOP.ILLEGAL) {
             throw this.error;
         }
         return oop;
@@ -93,8 +93,8 @@ class GciSession {
 
     executeFetchBytes(string, expectedSize = 1024) {
         const buffer = Buffer.alloc(expectedSize);
-        const actualSize = this.gci.GciTsExecuteFetchBytes(this.session, string, string.length, OOP_CLASS_STRING, 
-            OOP_ILLEGAL, OOP_NIL, buffer, buffer.length, this.error.ref());
+        const actualSize = this.gci.GciTsExecuteFetchBytes(this.session, string, string.length, OOP.String, 
+            OOP.ILLEGAL, OOP.nil, buffer, buffer.length, this.error.ref());
         if (actualSize === -1) {
             throw this.error;
         }
@@ -121,7 +121,7 @@ class GciSession {
 
     fetchClass(oop) {
         const classOop = this.gci.GciTsFetchClass(this.session, oop, this.error.ref());
-        if (classOop === OOP_ILLEGAL) {
+        if (classOop === OOP.ILLEGAL) {
             throw this.error;
         }
         return classOop;
@@ -159,7 +159,7 @@ class GciSession {
 
     fetchSpecialClass(oop) {
         const result = this.gci.GciTsFetchSpecialClass(oop);
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw new Error('Not a special OOP');
         }
         return result;
@@ -245,7 +245,7 @@ class GciSession {
 
     i64ToOop(int) {
         const result = this.gci.GciTsI64ToOop(this.session, int, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -300,7 +300,7 @@ class GciSession {
 
     newByteArray(bytes = '', size = bytes.length) {
         const result = this.gci.GciTsNewByteArray(this.session, bytes, size, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -308,7 +308,7 @@ class GciSession {
 
     newObj(classOop) {
         const result = this.gci.GciTsNewObj(this.session, classOop, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -316,7 +316,7 @@ class GciSession {
 
     newString(bytes = '', size = bytes.length) {
         const result = this.gci.GciTsNewString(this.session, bytes, size, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -324,7 +324,7 @@ class GciSession {
 
     newSymbol(bytes) {
         const result = this.gci.GciTsNewSymbol(this.session, bytes, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -337,7 +337,7 @@ class GciSession {
     newUnicodeString(string) {
         const buffer = Buffer.from(string, 'utf16le');
         const result = this.gci.GciTsNewUnicodeString_(this.session, buffer, string.length, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -345,7 +345,7 @@ class GciSession {
 
     newUtf8String(bytes) {
         const result = this.gci.GciTsNewUtf8String_(this.session, bytes, bytes.length, this.error.ref());
-        if (result === OOP_ILLEGAL) {
+        if (result === OOP.ILLEGAL) {
             throw this.error;
         }
         return result;
@@ -384,9 +384,9 @@ class GciSession {
         for (i = 0; i < 10; i++) {
             args.writeIntLE(oopArray[i], i * 8, 6);
         }
-        const oop = this.gci.GciTsPerform(this.session, receiver, OOP_ILLEGAL, selector, args, 
+        const oop = this.gci.GciTsPerform(this.session, receiver, OOP.ILLEGAL, selector, args, 
             oopArray.length, 0, 0, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        if (oop === OOP.ILLEGAL) {
             throw this.error;
         }
         return oop;
@@ -445,17 +445,17 @@ class GciSession {
         return result == 1;
    }
 
-    resolveSymbol(string, symbolList = OOP_NIL) {
+    resolveSymbol(string, symbolList = OOP.nil) {
         const oop = this.gci.GciTsResolveSymbol(this.session, string, symbolList, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        if (oop === OOP.ILLEGAL) {
             throw new Error('Symbol not found!');
         }
         return oop;
     }
 
-    resolveSymbolObj(stringOop, symbolList = OOP_NIL) {
+    resolveSymbolObj(stringOop, symbolList = OOP.nil) {
         const oop = this.gci.GciTsResolveSymbolObj(this.session, stringOop, symbolList, this.error.ref());
-        if (oop === OOP_ILLEGAL) {
+        if (oop === OOP.ILLEGAL) {
             throw new Error('Symbol not found!');
         }
         return oop;

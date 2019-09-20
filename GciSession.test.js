@@ -4,8 +4,6 @@
 
 const { GciSession } = require("./GciSession");
 let session;
-let nil, arrayClass, byteArrayClass, collectionClass, falseOop, globals, objectClass, stringClass, symbolClass, 
-    symbolDictionaryClass, trueOop, undefinedObjectClass;
 
 getLogin = () => {
     const fs = require('fs');
@@ -110,29 +108,28 @@ test('trace', () => {
     expect(session.trace(0)).toBe(3);
 })
 
+// tests not just the function, but verifies that we have the right constant
 test('resolveSymbol', () => {
+    expect(session.resolveSymbol('nil')).toBe(OOP.nil);
+    expect(session.resolveSymbol('Array')).toBe(OOP.Array);
+    expect(session.resolveSymbol('ByteArray')).toBe(OOP.ByteArray);
+    expect(session.resolveSymbol('Collection')).toBe(OOP.Collection);
+    expect(session.resolveSymbol('false')).toBe(OOP.false);
+    expect(session.resolveSymbol('Globals')).toBe(OOP.Globals);
+    expect(session.resolveSymbol('Object')).toBe(OOP.Object);
+    expect(session.resolveSymbol('Symbol')).toBe(OOP.Symbol);
+    expect(session.resolveSymbol('SymbolDictionary')).toBe(OOP.SymbolDictionary);
+    expect(session.resolveSymbol('true')).toBe(OOP.true);
+    expect(session.resolveSymbol('UndefinedObject')).toBe(OOP.UndefinedObject);
+})
+
+test('resoveSymbol error', () => {
     let error, other;
     try {
-        nil = session.resolveSymbol('nil');
-        arrayClass = session.resolveSymbol('Array');
-        byteArrayClass = session.resolveSymbol('ByteArray');
-        collectionClass = session.resolveSymbol('Collection');
-        falseOop = session.resolveSymbol('false');
-        globals = session.resolveSymbol('Globals');
-        objectClass = session.resolveSymbol('Object');
-        stringClass = session.resolveSymbol('String');
-        symbolClass = session.resolveSymbol('Symbol');
-        symbolDictionaryClass = session.resolveSymbol('SymbolDictionary');
-        trueOop = session.resolveSymbol('true');
-        undefinedObjectClass = session.resolveSymbol('UndefinedObject');
         other = session.resolveSymbol('should not be found!');
     } catch (e) {
         error = e;
     }
-    expect(nil).toBe(20);
-    expect(arrayClass).toBe(66817);
-    expect(objectClass).toBe(72193);
-    expect(globals).toBe(207361);
     expect(other).toBe(undefined);
     expect(error.message).toBe('Symbol not found!');
 })
@@ -153,20 +150,20 @@ test('resolveSymbolObj', () => {
 test('fetchClass', () => {
     let error, oop;
     try {
-        oop = session.fetchClass(globals);
+        oop = session.fetchClass(OOP.Globals);
     } catch (e) {
         error = e;
     }
     expect(error).toBe(undefined);
-    expect(oop).toBe(symbolDictionaryClass);
+    expect(oop).toBe(OOP.SymbolDictionary);
 })
 
 test('fetchSize', () => {
     let error, sizeOfNil, sizeOfArrayClass, sizeOfGlobals;
     try {
-        sizeOfNil = session.fetchSize(nil);
-        sizeOfArrayClass = session.fetchSize(arrayClass);
-        sizeOfGlobals = session.fetchSize(globals);
+        sizeOfNil = session.fetchSize(OOP.nil);
+        sizeOfArrayClass = session.fetchSize(OOP.Array);
+        sizeOfGlobals = session.fetchSize(OOP.Globals);
     } catch (e) {
         error = e;
     }
@@ -179,8 +176,8 @@ test('fetchSize', () => {
 test('fetchVaryingSize', () => {
     let error, sizeOfNil, sizeOfArrayClass, sizeOfGlobals;
     try {
-        sizeOfArrayClass = session.fetchVaryingSize(arrayClass);
-        sizeOfGlobals = session.fetchVaryingSize(globals);
+        sizeOfArrayClass = session.fetchVaryingSize(OOP.Array);
+        sizeOfGlobals = session.fetchVaryingSize(OOP.Globals);
     } catch (e) {
         error = e;
     }
@@ -192,8 +189,8 @@ test('fetchVaryingSize', () => {
 test('isKindOf', () => {
     let error, flag1, flag2;
     try {
-        flag1 = session.isKindOf(globals, symbolDictionaryClass);
-        flag2 = session.isKindOf(nil, symbolDictionaryClass);
+        flag1 = session.isKindOf(OOP.Globals, OOP.SymbolDictionary);
+        flag2 = session.isKindOf(OOP.nil, OOP.SymbolDictionary);
     } catch (e) {
         error = e;
     }
@@ -203,28 +200,28 @@ test('isKindOf', () => {
 })
 
 test('isKindOfClass', () => {
-    expect(session.isKindOfClass(globals, symbolDictionaryClass)).toBe(true);
-    expect(session.isKindOfClass(nil, symbolDictionaryClass)).toBe(false);
+    expect(session.isKindOfClass(OOP.Globals, OOP.SymbolDictionary)).toBe(true);
+    expect(session.isKindOfClass(OOP.nil, OOP.SymbolDictionary)).toBe(false);
 })
 
 test('isSubclassOf', () => {
-    expect(session.isSubclassOf(arrayClass, collectionClass)).toBe(true);
-    expect(session.isSubclassOf(collectionClass, arrayClass)).toBe(false);
+    expect(session.isSubclassOf(OOP.Array, OOP.Collection)).toBe(true);
+    expect(session.isSubclassOf(OOP.Collection, OOP.Array)).toBe(false);
 })
 
 test('isSubclassOfClass', () => {
-    expect(session.isSubclassOfClass(arrayClass, collectionClass)).toBe(true);
-    expect(session.isSubclassOfClass(collectionClass, arrayClass)).toBe(false);
+    expect(session.isSubclassOfClass(OOP.Array, OOP.Collection)).toBe(true);
+    expect(session.isSubclassOfClass(OOP.Collection, OOP.Array)).toBe(false);
 })
 
 test('oopIsSpecial', () => {
-    expect(session.oopIsSpecial(nil)).toBe(true);
-    expect(session.oopIsSpecial(globals)).toBe(false);
+    expect(session.oopIsSpecial(OOP.nil)).toBe(true);
+    expect(session.oopIsSpecial(OOP.Globals)).toBe(false);
 })
 
 test('objExists', () => {
-    expect(session.objExists(nil)).toBe(true);
-    expect(session.objExists(nil + 1)).toBe(false);
+    expect(session.objExists(OOP.nil)).toBe(true);
+    expect(session.objExists(OOP.nil + 1)).toBe(false);
 })
 
 test('execute', () => {
@@ -236,7 +233,7 @@ test('execute', () => {
         error = e;
     }
     expect(error).toBe(undefined);
-    expect(oop1).toBe(arrayClass);
+    expect(oop1).toBe(OOP.Array);
     expect(oop2).toBe(42);
 })
 
@@ -254,13 +251,13 @@ test('executeFetchBytes', () => {
 test('perform', () => {
     let error, oop1, oop2;
     try {
-        oop1 = session.perform(globals, 'yourself', []);
+        oop1 = session.perform(OOP.Globals, 'yourself', []);
         oop2 = session.perform(18, '+', [26]);  // 2 + 3
     } catch (e) {
         error = e;
     }
     expect(error).toBe(undefined);
-    expect(oop1).toBe(globals);
+    expect(oop1).toBe(OOP.Globals);
     expect(oop2).toBe(42);      // 5
 })
 
@@ -268,8 +265,8 @@ test('performFetchBytes', () => {
     let error, string1, string2, string3;
     try {
         string1 = session.performFetchBytes(42, 'printString', [], 8);
-        string2 = session.performFetchBytes(arrayClass, 'printString', [], 6);
-        string3 = session.performFetchBytes(arrayClass, 'printString', [], 4);
+        string2 = session.performFetchBytes(OOP.Array, 'printString', [], 6);
+        string3 = session.performFetchBytes(OOP.Array, 'printString', [], 4);
     } catch (e) {
         error = e;
     }
@@ -327,7 +324,7 @@ test('clearStack', () => {
 
 test('fetchSpecialClass', () => {
     let error;
-    expect(session.fetchSpecialClass(nil)).toBe(undefinedObjectClass);
+    expect(session.fetchSpecialClass(OOP.nil)).toBe(OOP.UndefinedObject);
     try {
         session.fetchSpecialClass(21);
     } catch (e) {
@@ -358,13 +355,13 @@ test('oopToI64', () => {
 })
 
 test('newObj', () => {
-    const obj = session.newObj(arrayClass);
-    expect(session.isKindOf(obj, arrayClass)).toBe(true);
+    const obj = session.newObj(OOP.Array);
+    expect(session.isKindOf(obj, OOP.Array)).toBe(true);
 })
 
 test('newByteArray', () => {
     let obj = session.newByteArray();
-    expect(session.isKindOf(obj, byteArrayClass)).toBe(true);
+    expect(session.isKindOf(obj, OOP.ByteArray)).toBe(true);
     expect(session.fetchSize(obj)).toBe(0);
     obj = session.newByteArray('abc\0xyz');
     expect(session.fetchSize(obj)).toBe(7);
@@ -374,7 +371,7 @@ test('newByteArray', () => {
 
 test('newString', () => {
     let obj = session.newString();
-    expect(session.isKindOf(obj, stringClass)).toBe(true);
+    expect(session.isKindOf(obj, OOP.String)).toBe(true);
     expect(session.fetchSize(obj)).toBe(0);
     obj = session.newString('abc\0xyz');
     expect(session.fetchSize(obj)).toBe(3);
@@ -382,20 +379,20 @@ test('newString', () => {
 
 test('newSymbol', () => {
     let obj = session.newSymbol('Array');
-    expect(session.isKindOf(obj, symbolClass)).toBe(true);
+    expect(session.isKindOf(obj, OOP.Symbol)).toBe(true);
 })
 
 test('object bitmaps', () => {
     const oop = session.newSymbol('Array');
     let string = '(GsBitmap newForHiddenSet: #PureExportSet) _doAsOops: [:each | (each == ';
     string = string + oop.toString() + ') ifTrue: [^true]]. false.';
-    expect(session.execute(string)).toBe(trueOop);
+    expect(session.execute(string)).toBe(OOP.true);
     session.releaseAllObjs();
-    expect(session.execute(string)).toBe(falseOop);
+    expect(session.execute(string)).toBe(OOP.false);
     session.saveObjs([ oop ]);
-    expect(session.execute(string)).toBe(trueOop);
+    expect(session.execute(string)).toBe(OOP.true);
     session.releaseObjs([ oop ]);
-    expect(session.execute(string)).toBe(falseOop);
+    expect(session.execute(string)).toBe(OOP.false);
 })
 
 test('compiling and removing methods', () => {
@@ -472,13 +469,13 @@ test('fetchOops', () => {
     expect(array[0]).toBe(session.i64ToOop(0));
     array = session.fetchOops(arrayOop, 1, 3);
     expect(array.length).toBe(3);
-    expect(array).toStrictEqual([trueOop, falseOop, nil]);
+    expect(array).toStrictEqual([OOP.true, OOP.false, OOP.nil]);
 })
 
 test('storeBytes', () => {
     const string = 'abcdefg';
     const oop = session.newString(string);
-    session.storeBytes('CDEXXX', oop, stringClass, startIndex = 2, numBytes = 3);
+    session.storeBytes('CDEXXX', oop, OOP.String, startIndex = 2, numBytes = 3);
     const result = session.fetchChars(oop);
     expect(result).toStrictEqual('abCDEfg');
 })
@@ -486,15 +483,15 @@ test('storeBytes', () => {
 test('removeOopsFromNsc', () => {
     const nsc = session.execute('(IdentitySet with: true with: false with: 5)');
     expect(session.fetchVaryingSize(nsc)).toBe(3);
-    expect(session.removeOopsFromNsc(nsc, [trueOop])).toBe(true);
-    expect(session.removeOopsFromNsc(nsc, [trueOop, falseOop])).toBe(false);
+    expect(session.removeOopsFromNsc(nsc, [OOP.true])).toBe(true);
+    expect(session.removeOopsFromNsc(nsc, [OOP.true, OOP.false])).toBe(false);
     expect(session.fetchVaryingSize(nsc)).toBe(1);
 })
 
 test('fetchObjInfo', () => {
-    const objInfo = session.fetchObjInfo(globals);
-    expect(objInfo.objId()).toBe(globals);
-    expect(objInfo.objClass()).toBe(symbolDictionaryClass);
+    const objInfo = session.fetchObjInfo(OOP.Globals);
+    expect(objInfo.objId()).toBe(OOP.Globals);
+    expect(objInfo.objClass()).toBe(OOP.SymbolDictionary);
     expect(objInfo.access()).toBe(2);       // DataCurator can write Globals?
     expect(objInfo.isInvariant()).toBe(0);  // want this to return a Boolean
     expect(objInfo.objImpl()).toBe(0);
@@ -531,19 +528,24 @@ test('traversalBuffer', () => {
     expect(header.idxSize()).toBe(0);
     header.setIdxSize(20);
     expect(header.idxSize()).toBe(20);
-    header.setIdxSizeBits(20, 0, 5);
-    expect(header.numDynamicIvs()).toBe(5);
-    expect(header.idxSize()).toBe(20);
-    expect(header.objImpl()).toBe(0);
     header.setObjImpl(3);
     expect(header.objImpl()).toBe(3);
+    header.setNumDynamicIvs(5);
     expect(header.numDynamicIvs()).toBe(5);
+    header.setIdxSize(20);
     expect(header.idxSize()).toBe(20);
-    header.clearBits();
     expect(header.usedBytes()).toBe(40);
-    expect(header.valueBufNumOops()).toBe(0);
+    expect(header.numOopsInValue()).toBe(0);
     expect(header.nextReport()._address()).toBe(header._address() + 40);
     expect(header.valueBuffer().byteOffset).toBe(header._address() + 40);
+    header.clearBits();
+    expect(header.isClamped()).toBe(false);
+    header.setIsClamped();
+    expect(header.isClamped()).toBe(true);
+    header.setIsClamped(false);
+    expect(header.isClamped()).toBe(false);
+    header.setIsClamped(true);
+    expect(header.isClamped()).toBe(true);
 })
 
 test('logout', () => {
