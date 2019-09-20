@@ -44,8 +44,8 @@ class GciTsObjInfo {        // gcits.hf
 }
 
 class GciObjRepHdrSType {   // gci.ht
-    constructor(buf){ this.buffer = buf; }
-    foo() { return 'bar'; }
+    constructor(buf){ this.buffer = buf; this.headerSize = 40; }
+    _class() { return 'GciObjRepHdrSType'; }
     _address()      { return this.buffer.byteOffset; }
     valueBuffSize() { return this.buffer.readIntLE ( 0, 4); }   // size in bytes of obj's value buff 
     namedSize()     { return this.buffer.readIntLE ( 4, 2); }   // number of named instVars
@@ -53,7 +53,23 @@ class GciObjRepHdrSType {   // gci.ht
     objId()         { return this.buffer.readIntLE ( 8, 6); }   // OOP of the object
     oclass()        { return this.buffer.readIntLE (16, 6); }   // OOP of the class of the object
     firstOffset()   { return this.buffer.readIntLE (24, 6); }   // absolute offset of first instVar in the value buffer
-    _idxSizeBits()  { return this.buffer.readUIntLE(32, 6); }   // 40 bits of size, 8 bits numDynamicIvs, 16 bits ?
+    _idxSizeBits()  { return this.buffer.readUIntLE(32, 6); }   // 40 bits of size, 8 bits numDynamicIvs, 16 bit flags
+    _setIdxSizeBits(value) 
+                    { this.buffer.writeUIntLE(value, 32, 6); }
+    idxSize()       { return this._idxSizeBits() >> 24; }
+    setIdxSize(size){ this._setIdxSizeBits(size << 24 | (this._idxSizeBits() & 0xFFFFFF)); }
+    setIdxSizeBits(size, bits, nDynamicIvs)
+                    { this._setIdxSizeBits(size << 24 | ((nDynamicIvs & 0xFF) << 16) | (bits & 0xFFFF)); }
+    numDynamicIvs() { return (this._idxSizeBits() >> 16) & 0xFF; }
+    objImpl()       { return this._idxSizeBits() & 0x03; }
+    setObjImpl(v)   { this._setIdxSizeBits((this._idxSizeBits() & ~ 0x03) | (v & 0x03)); }
+    objSize()       { return this.idxSize() + this.namedSize() }
+    clearBits()     { this._setIdxSizeBits(this._idxSizeBits() & ~ 0xFFFF) }
+    usedBytes()     { return this.headerSize + this.valueBuffSize(); }
+    valueBufNumOops()
+                    { return this.valueBuffSize() / 8; }
+    nextReport()    { return new GciObjRepHdrSType(this.buffer.slice(this.usedBytes())); }
+    valueBuffer()   { return this.buffer.slice(this.headerSize); }
 }
 
 class GciObjRepSType {      // gci.ht

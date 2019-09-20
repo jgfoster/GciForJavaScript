@@ -528,7 +528,22 @@ test('traversalBuffer', () => {
     expect(header.objId()).toBe(0);
     expect(header.oclass()).toBe(0);
     expect(header.firstOffset()).toBe(0);
-    
+    expect(header.idxSize()).toBe(0);
+    header.setIdxSize(20);
+    expect(header.idxSize()).toBe(20);
+    header.setIdxSizeBits(20, 0, 5);
+    expect(header.numDynamicIvs()).toBe(5);
+    expect(header.idxSize()).toBe(20);
+    expect(header.objImpl()).toBe(0);
+    header.setObjImpl(3);
+    expect(header.objImpl()).toBe(3);
+    expect(header.numDynamicIvs()).toBe(5);
+    expect(header.idxSize()).toBe(20);
+    header.clearBits();
+    expect(header.usedBytes()).toBe(40);
+    expect(header.valueBufNumOops()).toBe(0);
+    expect(header.nextReport()._address()).toBe(header._address() + 40);
+    expect(header.valueBuffer().byteOffset).toBe(header._address() + 40);
 })
 
 test('logout', () => {
