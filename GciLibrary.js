@@ -64,6 +64,7 @@ module.exports = (path) => {
         'GciTsFetchOops'            : [ 'int',      [ GciSessionType, OopType, 'int64', 'pointer', 'int', pGciErrSType ] ],
         'GciTsFetchSize'            : [ 'int64',    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsFetchSpecialClass'    : [ OopType,    [ OopType ] ],
+        'GciTsFetchTraversal'       : [ 'int',      [ GciSessionType, 'pointer', 'int', 'pointer', 'pointer', 'int', pGciErrSType ] ],
         'GciTsFetchUnicode'         : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],
         'GciTsFetchUtf8'            : [ 'int64',    [ GciSessionType, OopType, 'pointer', 'int64', 'pointer', pGciErrSType ] ],
         'GciTsFetchUtf8Bytes'       : [ 'int64',    [ GciSessionType, OopType, 'int64', 'pointer', 'int64', 'pointer', pGciErrSType, 'int' ] ],

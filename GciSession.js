@@ -126,6 +126,16 @@ class GciSession {
         }
         return classOop;
     }
+/*
+EXTERN_GCI_DEC(int) GciTsFetchTraversal(GciSession sess, 
+        const OopType *theOops, int numOops,
+        GciClampedTravArgsSType *ctArgs,
+	GciTravBufType *travBuff, int flag, GciErrSType *err);
+*/
+
+    fetchTraversal(oopList) {
+
+    }
 
     fetchObjInfo(objId) {
         const objInfo = new GciTsObjInfo;
@@ -485,6 +495,18 @@ class GciSession {
             buffer = Buffer.from(bytes);
         }
         if (!this.gci.GciTsStoreBytes(this.session, oopObject, startIndex + 1, buffer, numBytes, oopClass, this.error.ref())) {
+            throw this.error;
+        }
+    }
+
+    storeTrav(
+        travBuf,                    // GciTravBufType
+        shouldReplace = false,      // use REPLACE semantics for varying instvars of Nsc's
+        shouldCreate = false,       // If an object to be stored into does not exist, use GciCreate to create it
+        doDeferredUpdates = false,  // execute GciProcessDeferredUpdates qfter processing the last object report
+    ) {
+        const flag = (shouldReplace ? 1 : 0) | (shouldCreate ? 2 : 0) | (doDeferredUpdates ? 8 : 0);
+        if (!this.gci.GciTsStoreTrav(this.session, travBuf, flag, this.error.ref())) {
             throw this.error;
         }
     }
