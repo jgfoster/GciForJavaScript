@@ -120,9 +120,9 @@ The following provides a list of all the functions defined in `gcits.hf` grouped
 
 ```C
     int        GciTsStoreTravDoTravRefs(GciSession sess, ...);
-    int        GciTsFetchTraversal(GciSession sess, ...);
-    BoolType   GciTsStoreTrav(GciSession sess, ...);
-    int        GciTsMoreTraversal(GciSession sess, ...);
+✓   int        GciTsFetchTraversal(GciSession sess, ...);
+✓   BoolType   GciTsStoreTrav(GciSession sess, ...);
+✓   int        GciTsMoreTraversal(GciSession sess, ...);
 ```
 
 ### Table 7.9 Structural Access Functions

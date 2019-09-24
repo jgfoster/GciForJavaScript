@@ -89,6 +89,7 @@ module.exports = (path) => {
                                         pGciErrSType
                                     ] ],
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
+        'GciTsMoreTraversal'        : [ 'int',      [ GciSessionType, 'pointer', pGciErrSType ] ],
         'GciTsNewByteArray'         : [ OopType,    [ GciSessionType, 'string', 'int', pGciErrSType ] ],
         'GciTsNewObj'               : [ OopType,    [ GciSessionType, OopType, pGciErrSType ] ],
         'GciTsNewString'            : [ OopType,    [ GciSessionType, 'string', 'int', pGciErrSType ] ],
@@ -131,6 +132,7 @@ module.exports = (path) => {
         'GciTsSessionIsRemote'      : [ 'int',      [ GciSessionType ] ],
         'GciTsStoreBytes'           : [ 'bool',     [ GciSessionType, OopType, 'int64', 'pointer', 'int64', OopType, pGciErrSType ] ],
         'GciTsStoreTrav'            : [ 'bool',     [ GciSessionType, 'pointer', 'int', pGciErrSType ] ],
+        'GciTsStoreTravDoTravRefs'  : [ 'int',      [ GciSessionType, 'pointer', 'int', 'pointer', 'int', 'pointer', 'pointer', pGciErrSType ] ],
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
 }

@@ -4,6 +4,7 @@
 
 global.OOP = {
     Array: 66817,
+    Association: 67073,
     ByteArray: 103425,
     Collection: 68865,
     false: 12,

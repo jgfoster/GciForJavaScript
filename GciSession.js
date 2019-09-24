@@ -6,7 +6,7 @@
 
 const GciErrSType    = require('./GciErrSType');
 const GciLibrary     = require("./GciLibrary");
-const GciTravBufType = require('./GciTravBufType');
+const { GciTravBufType, GciClampedTravArgsSType } = require('./GciTravBufType');
 const GciTsObjInfo   = require('./GciTsObjInfo');
 require("./GciConstants");
 
@@ -126,15 +126,20 @@ class GciSession {
         }
         return classOop;
     }
-/*
-EXTERN_GCI_DEC(int) GciTsFetchTraversal(GciSession sess, 
-        const OopType *theOops, int numOops,
-        GciClampedTravArgsSType *ctArgs,
-	GciTravBufType *travBuff, int flag, GciErrSType *err);
-*/
 
-    fetchTraversal(oopList) {
-
+    fetchTraversal(oopArray) {
+        const ctArgs = new GciClampedTravArgsSType();
+        const travBuffer = new GciTravBufType();
+        const oopBuffer = Buffer.alloc(oopArray.length * 8);
+        for (let i = 0; i < oopArray.length; i++) {
+            oopBuffer.writeIntLE(oopArray[i], i * 8, 6);
+        }
+        const result = this.gci.GciTsFetchTraversal(this.session, oopBuffer, oopArray.length, ctArgs.ref(), travBuffer.ref(), 0, this.error.ref());
+        if (result === -1) {
+            throw this.error;
+        }
+        const isDone = result === 1;
+        return { isDone, travBuffer };
     }
 
     fetchObjInfo(objId) {
@@ -308,6 +313,16 @@ EXTERN_GCI_DEC(int) GciTsFetchTraversal(GciSession sess,
         this.session = 0;
     }
 
+    moreTraversal() {
+        const travBuffer = new GciTravBufType();
+        const result = this.gci.GciTsMoreTraversal(this.session, travBuffer.ref(), this.error.ref());
+        if (result === -1) {
+            throw this.error;
+        }
+        const isDone = result === 1;
+        return { isDone, travBuffer };
+    }
+
     newByteArray(bytes = '', size = bytes.length) {
         const result = this.gci.GciTsNewByteArray(this.session, bytes, size, this.error.ref());
         if (result === OOP.ILLEGAL) {
@@ -402,7 +417,7 @@ EXTERN_GCI_DEC(int) GciTsFetchTraversal(GciSession sess,
         return oop;
     }
 
-    performFetchBytes(receiver, selector, oopArray, expectedSize) {
+    performFetchBytes(receiver, selector = 'printString', oopArray = [], expectedSize = 1024) {
         const args = Buffer.alloc(80);
         var i;
         for (i = 0; i < 10; i++) {
@@ -506,9 +521,25 @@ EXTERN_GCI_DEC(int) GciTsFetchTraversal(GciSession sess,
         doDeferredUpdates = false,  // execute GciProcessDeferredUpdates qfter processing the last object report
     ) {
         const flag = (shouldReplace ? 1 : 0) | (shouldCreate ? 2 : 0) | (doDeferredUpdates ? 8 : 0);
-        if (!this.gci.GciTsStoreTrav(this.session, travBuf, flag, this.error.ref())) {
+        if (!this.gci.GciTsStoreTrav(this.session, travBuf.ref(), flag, this.error.ref())) {
             throw this.error;
         }
+    }
+/*
+EXTERN_GCI_DEC(int) GciTsStoreTravDoTravRefs(GciSession sess,
+    const OopType *oopsNoLongerReplicated, int numNotReplicated,
+    const OopType *oopsGcedOnClient, int numGced,
+    GciStoreTravDoArgsSType *stdArgs, GciClampedTravArgsSType *ctArgs,
+    GciErrSType *err);
+*/
+
+    storeTravDoTravRefs(
+        oopsNoLongerReplicated = [],
+        oopsGcedOnClient = [],
+        stdArgs,
+        ctArgs
+    ) {
+
     }
 
     trace(level) {

@@ -548,6 +548,55 @@ test('traversalBuffer', () => {
     expect(header.isClamped()).toBe(true);
 })
 
+test('fetchTraversal', () => {
+    const oop = session.execute('true -> 5');
+    const { isDone, travBuffer } = session.fetchTraversal([oop]);
+    expect(isDone).toBe(true);
+    expect(travBuffer._address()).toBe(0);
+    expect(travBuffer.allocatedBytes()).toBe(2048);
+    expect(travBuffer.usedBytes()).toBe(56);
+    const objectReport = travBuffer.firstReport();
+    expect(objectReport._address()).toBe(8);
+    const objectReportHeader = objectReport.header();
+    expect(objectReportHeader._address()).toBe(8);
+    expect(objectReportHeader.valueBuffSize()).toBe(16);
+    expect(objectReportHeader.namedSize()).toBe(2);
+    expect(objectReportHeader.securityPolicy()).toBe(2);
+    expect(objectReportHeader.objId()).toBe(oop);
+    expect(objectReportHeader.oclass()).toBe(OOP.Association);
+    expect(objectReportHeader.firstOffset()).toBe(1);   // ??
+    expect(objectReportHeader.idxSize()).toBe(0);
+    expect(objectReportHeader.numDynamicIvs()).toBe(0);
+    expect(objectReportHeader.numOopsInValue()).toBe(2);
+    expect(objectReportHeader.objImpl()).toBe(0);
+    expect(objectReportHeader.objSize()).toBe(2);
+    expect(objectReportHeader.usedBytes()).toBe(56);
+    expect(objectReport.bytes().byteOffset).toBe(48);
+    expect(objectReportHeader.valueBuffer().byteOffset).toBe(48);
+    const oops = objectReport.oops();
+    expect(oops.length).toBe(2);
+    expect(oops[0]).toBe(OOP.true);
+    expect(oops[1]).toBe(42);
+})
+
+test('storeTrav', () => {
+    const assoc = session.newObj(OOP.Association);
+    const travBuffer = session.newTraversalBuffer();
+    const report = travBuffer.firstReport();
+    const header = report.header();
+    travBuffer.setUsedBytes(56);
+    header.setValueBuffSize(16);
+    header.setNamedSize(2);
+    header.setSecurityPolicy();
+    header.setObjId(assoc);
+    header.setOclass(OOP.Association);
+    header.setFirstOffset(1);
+    report.setOops([OOP.false, OOP.Array]);
+    session.storeTrav(travBuffer);
+    const string = session.performFetchBytes(assoc);
+    expect(string).toBe('false->Array');
+})
+
 test('logout', () => {
     let error;
     try {
