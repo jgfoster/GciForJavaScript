@@ -50,7 +50,7 @@ class GciObjRepHdrSType {   // gci.ht
     // public mutators
     setValueBuffSize(v)           { return this.buffer.writeUIntLE(v,  0, 4); }   // size in bytes of obj's value buff 
     setNamedSize(v)               { return this.buffer.writeUIntLE(v,  4, 2); }   // number of named instVars
-    setSecurityPolicy(v = 0xFFFF) { return this.buffer.writeUIntLE(v,  6, 2); }   // UNDEFINED_ObjectSecurityPolicyId for existing objects
+    setSecurityPolicy(v = 0xFFFF) { return this.buffer.writeUIntLE(v,  6, 2); }   // UNDEFINED_ObjectSecurityPolicyId for existing objects (per gcioop.ht)
     setObjId(v)                   { return this.buffer.writeUIntLE(v,  8, 6); }   // OOP of the object
     setOclass(v)                  { return this.buffer.writeUIntLE(v, 16, 6); }   // OOP of the class of the object
     setFirstOffset(v = 1)         { return this.buffer.writeUIntLE(v, 24, 6); }   // absolute offset of first instVar in the value buffer
@@ -135,6 +135,70 @@ class GciClampedTravArgsSType {     // gcicmn.ht
     travBuff()          { return this.travBuff; }
     level()             { return this.buffer.readUIntLE(24, 4); }
     retrievalFlags()    { return this.buffer.readUIntLE(28, 4); }
+}
+
+class GciStoreTravDoArgsSType {     // gcimn.ht
+    constructor(doPerform, doFlags)       { 
+        this.buffer = Buffer.alloc(40);
+        this.buffer.writeUIntLE(doPerform,  0, 4);
+        this.buffer.writeUIntLE(doFlags  ,  4, 4);
+    }
+    alteredCompleted()  { return this.buffer.readUIntLE(12, 4) === 1; }
+}
+
+class GciStoreTravDoNothing extends GciStoreTravDoArgsSType {
+    constructor(oop) {
+        super(3, 0);
+        this.buffer.writeUIntLE(oop, 20, 6);
+    }
+}
+
+// args for a GciPerformNoDebug call or no execution
+class GciStoreTravDoPerform extends GciStoreTravDoArgsSType {
+    constructor(receiver) {
+        super(3, 0);
+        this.buffer.writeUIntLE(receiver, 20, 6);
+    }
+    receiver()          { return this.buffer.readUIntLE(16, 6); }
+}
+    
+
+/*
+    struct { /* args for a GciPerformNoDebug call or no execution 
+        OopType        receiver;
+        char           pad[24]; // Make later elements same offset as executestr, handy for GBS
+        const char*    selector;  // 1 byte per character
+        const OopType* args;
+        int            numArgs;
+        ushort         environmentId;  // compilation environment for execution
+    } perform;
+*/      
+
+
+    // args for ExecuteStr or ExecuteBlock
+/*
+    struct { // args for ExecuteStr or ExecuteBlock 
+      OopType   contextObject;
+      OopType   sourceClass; // String, Utf8 or Unicode7 or DoubleByteString
+      OopType   symbolList;
+      int64     sourceSize;
+      const char* source; // 1 or 2 bytes per char, client-native byte order
+      const OopType* args;         // ignored unless ExecuteBlock
+      int       numArgs;	         // ignored unless ExecuteBlock
+      ushort    environmentId;  // compilation environment for execution
+    } executestr;
+*/
+
+    // args for GciContinueWith
+/*
+    struct {  // args for GciContinueWith 
+      OopType process;
+      OopType replaceTopOfStack;
+      // also uses doFlags above
+      // GciErrSType *error input of GciContinueWith() always NULL
+    } continueArgs ;
+*/
+
 }
 
 module.exports = { GciTravBufType, GciClampedTravArgsSType }
