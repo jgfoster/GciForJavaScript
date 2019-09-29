@@ -512,12 +512,12 @@ test('traversalBuffer', () => {
     travBuf = session.newTraversalBuffer(2047);     // minimum of 2048
     expect(travBuf.allocatedBytes()).toBe(2048);
     expect(travBuf.usedBytes()).toBe(0);
-    expect(travBuf.firstReport   ()._address()).toBe(travBuf._address() + 8);
-    expect(travBuf.readLimit     ()._address()).toBe(travBuf._address() + 8);
-    expect(travBuf.writeLimit    ()._address()).toBe(travBuf._address() + 8 + 2048);
-    expect(travBuf.firstReportHdr()._address()).toBe(travBuf._address() + 8);
-    expect(travBuf.readLimitHdr  ()._address()).toBe(travBuf._address() + 8);
-    expect(travBuf.writeLimitHdr ()._address()).toBe(travBuf._address() + 8 + 2048);
+    expect(travBuf.firstReport   ().address()).toBe(travBuf.address() + 8);
+    expect(travBuf.readLimit     ().address()).toBe(travBuf.address() + 8);
+    expect(travBuf.writeLimit    ().address()).toBe(travBuf.address() + 8 + 2048);
+    expect(travBuf.firstReportHdr().address()).toBe(travBuf.address() + 8);
+    expect(travBuf.readLimitHdr  ().address()).toBe(travBuf.address() + 8);
+    expect(travBuf.writeLimitHdr ().address()).toBe(travBuf.address() + 8 + 2048);
     const header = travBuf.firstReportHdr();
     expect(header.valueBuffSize()).toBe(0);
     expect(header.namedSize()).toBe(0);
@@ -536,8 +536,8 @@ test('traversalBuffer', () => {
     expect(header.idxSize()).toBe(20);
     expect(header.usedBytes()).toBe(40);
     expect(header.numOopsInValue()).toBe(0);
-    expect(header.nextReport()._address()).toBe(header._address() + 40);
-    expect(header.valueBuffer().byteOffset).toBe(header._address() + 40);
+    expect(header.nextReport().address()).toBe(header.address() + 40);
+    expect(header.valueBuffer().address()).toBe(header.address() + 40);
     header.clearBits();
     expect(header.isClamped()).toBe(false);
     header.setIsClamped();
@@ -552,13 +552,13 @@ test('fetchTraversal', () => {
     const oop = session.execute('true -> 5');
     const { isDone, travBuffer } = session.fetchTraversal([oop]);
     expect(isDone).toBe(true);
-    expect(travBuffer._address()).toBe(0);
+    expect(travBuffer._byteOffset()).toBe(0);
     expect(travBuffer.allocatedBytes()).toBe(2048);
     expect(travBuffer.usedBytes()).toBe(56);
     const objectReport = travBuffer.firstReport();
-    expect(objectReport._address()).toBe(8);
+    expect(objectReport._byteOffset()).toBe(8);
     const objectReportHeader = objectReport.header();
-    expect(objectReportHeader._address()).toBe(8);
+    expect(objectReportHeader._byteOffset()).toBe(8);
     expect(objectReportHeader.valueBuffSize()).toBe(16);
     expect(objectReportHeader.namedSize()).toBe(2);
     expect(objectReportHeader.securityPolicy()).toBe(2);

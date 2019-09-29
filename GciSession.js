@@ -6,7 +6,12 @@
 
 const GciErrSType    = require('./GciErrSType');
 const GciLibrary     = require("./GciLibrary");
-const { GciTravBufType, GciClampedTravArgsSType } = require('./GciTravBufType');
+const { 
+    GciTravBufType, 
+    GciClampedTravArgsSType,
+    GciStoreTravDoNothing,
+    GciStoreTravDoPerform
+} = require('./GciTravBufType');
 const GciTsObjInfo   = require('./GciTsObjInfo');
 require("./GciConstants");
 
@@ -127,21 +132,6 @@ class GciSession {
         return classOop;
     }
 
-    fetchTraversal(oopArray) {
-        const ctArgs = new GciClampedTravArgsSType();
-        const travBuffer = new GciTravBufType();
-        const oopBuffer = Buffer.alloc(oopArray.length * 8);
-        for (let i = 0; i < oopArray.length; i++) {
-            oopBuffer.writeIntLE(oopArray[i], i * 8, 6);
-        }
-        const result = this.gci.GciTsFetchTraversal(this.session, oopBuffer, oopArray.length, ctArgs.ref(), travBuffer.ref(), 0, this.error.ref());
-        if (result === -1) {
-            throw this.error;
-        }
-        const isDone = result === 1;
-        return { isDone, travBuffer };
-    }
-
     fetchObjInfo(objId) {
         const objInfo = new GciTsObjInfo;
         const result = this.gci.GciTsFetchObjInfo(this.session, objId, false, objInfo.ref(), null, 0, this.error.ref());
@@ -178,6 +168,21 @@ class GciSession {
             throw new Error('Not a special OOP');
         }
         return result;
+    }
+
+    fetchTraversal(oopArray) {
+        const ctArgs = new GciClampedTravArgsSType();
+        const travBuffer = new GciTravBufType();
+        const oopBuffer = Buffer.alloc(oopArray.length * 8);
+        for (let i = 0; i < oopArray.length; i++) {
+            oopBuffer.writeIntLE(oopArray[i], i * 8, 6);
+        }
+        const result = this.gci.GciTsFetchTraversal(this.session, oopBuffer, oopArray.length, ctArgs.ref(), travBuffer.ref(), 0, this.error.ref());
+        if (result === -1) {
+            throw this.error;
+        }
+        const isDone = result === 1;
+        return { isDone, travBuffer };
     }
 
     fetchUnicode(oop) {

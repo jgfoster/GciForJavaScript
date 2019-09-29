@@ -1,6 +1,8 @@
 /*
  *  GciTravBufType.js
  */
+const ref            = require('ref');
+
 const headerSize = 40;
 
 class GciObjRepHdrSType {   // gci.ht
@@ -36,7 +38,8 @@ class GciObjRepHdrSType {   // gci.ht
     // internal and debugging functions
     _setIdxSizeBits(value)      { this.buffer.writeUIntLE(value, 32, 6); }
     _class()                    { return 'GciObjRepHdrSType';            }
-    _address()                  { return this.buffer.byteOffset;         }
+    _byteOffset()               { return this.buffer.byteOffset;         }
+    address()                   { return this.buffer.address();          }
     _setBitFlags(mask, value)   { this.buffer.writeUIntLE((this.bitFlags() & ~ mask) | (value & mask), 32, 2); }
 
     // public accessors
@@ -76,9 +79,10 @@ class GciObjRepHdrSType {   // gci.ht
 
 class GciObjRepSType {      // gci.ht
     constructor(buf){ this.buffer = buf; }
-    _address()      { return this.buffer.byteOffset; }
+    _byteOffset()   { return this.buffer.byteOffset;             }
+    address()       { return this.buffer.address();              }
     header()        { return new GciObjRepHdrSType(this.buffer); }
-    bytes()         { return this.buffer.slice(headerSize); }
+    bytes()         { return this.buffer.slice(headerSize);      }
     oops()          { 
         const result = [];
         const count = this.header().numOopsInValue();
@@ -107,7 +111,8 @@ class GciTravBufType {      // gcicmn.ht
         this.buffer.writeUInt32LE(bodySize, 0); // uint allocatedBytes; // allocated size of the body
         this.setUsedBytes(0);
     }
-    _address()      { return this.buffer.byteOffset;      }
+    _byteOffset()   { return this.buffer.byteOffset;      }
+    address()       { return this.buffer.address();       }
     ref()           { return this.buffer;                 }
     allocatedBytes(){ return this.buffer.readUInt32LE(0); }
     usedBytes()     { return this.buffer.readUInt32LE(4); }
@@ -121,13 +126,15 @@ class GciTravBufType {      // gcicmn.ht
 }
 
 class GciClampedTravArgsSType {     // gcicmn.ht
-    constructor(clampSpec = OOP.nil, level = 0, retrievalFlags = 0) { 
+    constructor(clampSpec = OOP.nil, resultOop = OOP.nil, level = 0, retrievalFlags = 0) { 
         this.buffer = Buffer.alloc(40); 
-        this.travBuff =  new GciTravBufType();
+        this.travBuffer =  new GciTravBufType();
         this.buffer.writeUIntLE(clampSpec, 0, 6);
+        this.buffer.writeUIntLE(resultOop, 8, 6);
+        this.buffer.writeUIntLE(this.travBuffer.address(), 16, 6);
         this.buffer.writeUIntLE(level, 24, 4);
         this.buffer.writeUIntLE(retrievalFlags, 28, 4);
-
+        this.buffer.writeUIntLE(0, 32, 4);  // BoolType isRpc; /* private, for use by implementation of GCI */
     }
     ref()               { return this.buffer; }
     clampSpec()         { return this.buffer.readUIntLE( 0, 6); }
@@ -139,27 +146,36 @@ class GciClampedTravArgsSType {     // gcicmn.ht
 
 class GciStoreTravDoArgsSType {     // gcimn.ht
     constructor(doPerform, doFlags)       { 
-        this.buffer = Buffer.alloc(40);
+        this.buffer = Buffer.alloc(128);
         this.buffer.writeUIntLE(doPerform,  0, 4);
         this.buffer.writeUIntLE(doFlags  ,  4, 4);
     }
-    alteredCompleted()  { return this.buffer.readUIntLE(12, 4) === 1; }
+    alteredCompleted()  { return this.buffer.readUIntLE(8, 4) === 1; }
 }
 
 class GciStoreTravDoNothing extends GciStoreTravDoArgsSType {
     constructor(oop) {
         super(3, 0);
-        this.buffer.writeUIntLE(oop, 20, 6);
+        this.buffer.writeUIntLE(oop, 12, 6);
     }
 }
 
 // args for a GciPerformNoDebug call or no execution
 class GciStoreTravDoPerform extends GciStoreTravDoArgsSType {
-    constructor(receiver) {
+    constructor(receiver, selector = 'yourself', args = [], environmentId = 0) {
+        this.selectorBuffer = Buffer.from(selector);
+        this.argsBuffer = Buffer.alloc(args.length * 8);
+        for (let i = 0; i < args.length; i++) {
+            this.argsBuffer.writeUIntLE(args[i], i * 8, 6);
+        }
         super(3, 0);
-        this.buffer.writeUIntLE(receiver, 20, 6);
+        this.buffer.writeUIntLE(receiver, 12, 6);
+        // char           pad[24]; // Make later elements same offset as executestr, handy for GBS
+        this.buffer.writeUIntLE(this.selectorBuffer.address(), 44, 6);
+        this.buffer.writeUIntLE(this.argsBuffer.address(), 52, 6);
+        this.buffer.writeUIntLE(args.length, 60, 4);
+        this.buffer.writeUIntLE(environmentId, 64, 4);
     }
-    receiver()          { return this.buffer.readUIntLE(16, 6); }
 }
     
 
@@ -199,6 +215,9 @@ class GciStoreTravDoPerform extends GciStoreTravDoArgsSType {
     } continueArgs ;
 */
 
+module.exports = { 
+    GciTravBufType, 
+    GciClampedTravArgsSType, 
+    GciStoreTravDoNothing,
+    GciStoreTravDoPerform
 }
-
-module.exports = { GciTravBufType, GciClampedTravArgsSType }
