@@ -4,8 +4,8 @@
  *  GciSession provides a wrapper around GciLibrary
  */
 
-const GciErrSType    = require('./GciErrSType');
-const GciLibrary     = require("./GciLibrary");
+const { GciErrSType } = require("./GciErrSType");
+const { GciLibrary }  = require("./GciLibrary");
 const { GciTravBufType, GciClampedTravArgsSType } = require('./GciTravBufType');
 const GciTsObjInfo   = require('./GciTsObjInfo');
 require("./GciConstants");
@@ -14,6 +14,7 @@ class GciSession {
     constructor(login) {
         this.gci = GciLibrary(login.library);
         this.error = new GciErrSType();
+        const flag = Buffer.alloc(4);
         const stoneNRS = '!tcp@localhost#server!' + login.stone;
         const gemNRS = '!tcp@' + login.gem_host + '#netldi:' + login.netldi + '#task!gemnetobject';
         this.session = this.gci.GciTsLogin(
@@ -26,6 +27,7 @@ class GciSession {
             login.gs_password,      // const char *gemstonePassword
             0,                      // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
             0,                      // int haltOnErrNum
+            flag.ref(),             // BoolType *executedSessionInit
             this.error.ref()        // GciErrSType *err
         );
         if (this.session === 0) {

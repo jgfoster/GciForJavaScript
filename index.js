@@ -2,4 +2,4 @@
  *  index.js
  */
 
-module.exports = require("./GciSession");
+module.exports = require("./src/GciSession");

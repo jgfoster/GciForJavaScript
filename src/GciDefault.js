@@ -12,7 +12,7 @@
  */
 
 module.exports = {
-    library: 'libgcits-3.5.2-64.dylib',
+    library: './lib/libgcits-3.5.2-64.dylib',
     gem_host: 'localhost',
     stone: 'gs64stone',
     gs_user: 'DataCurator',

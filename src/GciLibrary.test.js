@@ -13,7 +13,7 @@
  * to have a project open even if it is unrelated!).
  * 
  */
-
+  
 const { GciLibrary } = require("./GciLibrary");
 const { GciErrSType } = require("./GciErrSType");
 const { SSL_OP_EPHEMERAL_RSA } = require("constants");
@@ -25,18 +25,19 @@ function wait(ms){
       end = new Date().getTime();
    }
 }
-
+  
 getLogin = () => {
     const fs = require('fs');
     fs.access('./GciLogin.js', fs.F_OK, (err) => {
         if (err) {
-            fs.copyFile('./GciDefault.js', './GciLogin.js', (err) => {
+            fs.copyFile('./src/GciDefault.js', './GciLogin.js', (err) => {
             if (err) throw err;
             });
         }
     });
-    return require("./GciLogin");
+    return require("../GciLogin");
 }
+
 const login = getLogin();
 const gci = GciLibrary(login.library);
 let session = null;
