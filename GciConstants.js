@@ -1,5 +1,6 @@
 /*
- *  Yes, globals are bad, but this is only one and it translates nicely from OOP_NIL to OOP.nil
+ * Yes, globals are bad, but this is only one 
+ * and it translates nicely from OOP_NIL to OOP.nil
  */
 
 global.OOP = {

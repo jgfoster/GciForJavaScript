@@ -199,6 +199,5 @@ class GciStoreTravDoPerform extends GciStoreTravDoArgsSType {
     } continueArgs ;
 */
 
-}
 
 module.exports = { GciTravBufType, GciClampedTravArgsSType }

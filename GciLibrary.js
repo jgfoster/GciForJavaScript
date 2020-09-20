@@ -8,7 +8,7 @@ const pGciErrSType = 'pointer';
 const GciSessionType = 'int64';
 const OopType = 'int64';
 
-module.exports = (path) => {
+const GciLibrary = (path) => {
     return FFI.Library(path, {
         'GciI32ToOop'               : [ OopType,    [ 'int'] ], 
         'GciTsAbort'                : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
@@ -23,7 +23,7 @@ module.exports = (path) => {
         'GciTsContinueWith'         : [ OopType,    [ GciSessionType, OopType, OopType, 'pointer', 'int', pGciErrSType ] ],
         'GciTsCommit'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
         'GciTsDoubleToOop'          : [ OopType,    [ GciSessionType, 'double', pGciErrSType ] ],
-        'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double', pGciErrSType ] ], 
+        'GciTsDoubleToSmallDouble'  : [ OopType,    [ 'double' ] ], 
         'GciTsEncrypt'              : [ 'string',   [ 'string', 'pointer', 'int64' ]],
         'GciTsExecute'              : [ OopType,    [ 
                                         GciSessionType, 
@@ -77,15 +77,16 @@ module.exports = (path) => {
         'GciTsIsSubclassOf'         : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsIsSubclassOfClass'    : [ 'int',      [ GciSessionType, OopType, OopType, pGciErrSType ] ],
         'GciTsLogin'                : [ GciSessionType, [ 
-                                        'string', // const char *StoneNameNrs
-                                        'string', // const char *HostUserId
-                                        'string', // const char *HostPassword
-                                        'bool',   // BoolType hostPwIsEncrypted
-                                        'string', // const char *GemServiceNrs
-                                        'string', // const char *gemstoneUsername
-                                        'string', // const char *gemstonePassword
-                                        'uint',   // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
-                                        'int',    // int haltOnErrNum
+                                        'string',   // const char *StoneNameNrs
+                                        'string',   // const char *HostUserId
+                                        'string',   // const char *HostPassword
+                                        'bool',     // BoolType hostPwIsEncrypted
+                                        'string',   // const char *GemServiceNrs
+                                        'string',   // const char *gemstoneUsername
+                                        'string',   // const char *gemstonePassword
+                                        'uint',     // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
+                                        'int',      // int haltOnErrNum
+                                        'pointer',  // BoolType *executedSessionInit
                                         pGciErrSType
                                     ] ],
         'GciTsLogout'               : [ 'bool',     [ GciSessionType, pGciErrSType ] ],
@@ -136,3 +137,6 @@ module.exports = (path) => {
         'GciTsVersion'              : [ 'uint',     [ 'string', 'size_t' ] ],
     });
 }
+
+// module.exports
+exports.GciLibrary = GciLibrary;

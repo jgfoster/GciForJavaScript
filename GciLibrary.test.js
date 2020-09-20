@@ -3,11 +3,20 @@
  *
  *  Based on https://jestjs.io/docs/en/getting-started
  * 
- *  Renamed so that it doesn't run as part of the jest tests
- *  since something seems to be wrong with having two test suites!?
+ *  Tests are run in order and have side-effects (login/logout).
+ * 
+ * Debugging FFI calls is tricky and really needs access to source code!
+ * I have a private build if GemStone/S 64 Bit, and copy in the "slow" 
+ * libraries. Then run a test "forked" (repeat the shell command used by 
+ * Jest but append a '&') and observe the PID. Then, during a `wait(ms)`
+ * use Xcode and use Debug/Attach to Process by PID to connect (you need
+ * to have a project open even if it is unrelated!).
+ * 
  */
 
-const { GciLibrary, GciErrSType } = require("./GciLibrary");
+const { GciLibrary } = require("./GciLibrary");
+const { GciErrSType } = require("./GciErrSType");
+const { SSL_OP_EPHEMERAL_RSA } = require("constants");
 
 function wait(ms){
     let start = new Date().getTime();
@@ -15,49 +24,22 @@ function wait(ms){
     while(end < (start + ms)) {
       end = new Date().getTime();
    }
- }
-// wait(30000);     // give time to connect debugger
+}
 
 getLogin = () => {
     const fs = require('fs');
     fs.access('./GciLogin.js', fs.F_OK, (err) => {
-    if (err) {
-        fs.copyFile('./GciDefault.js', './GciLogin.js', (err) => {
-        if (err) throw err;
-        });
-    }
+        if (err) {
+            fs.copyFile('./GciDefault.js', './GciLogin.js', (err) => {
+            if (err) throw err;
+            });
+        }
     });
     return require("./GciLogin");
 }
 const login = getLogin();
 const gci = GciLibrary(login.library);
 let session = null;
-
-// Login attempt needed to initialize library (http://kermit.gemtalksystems.com/bug?bug=48091)
-test('GciTsLogin with nulls', () => {
-    const error = new GciErrSType();
-    session = gci.GciTsLogin(
-        null, // const char *StoneNameNrs
-        null, // const char *HostUserId
-        null, // const char *HostPassword
-        false, // BoolType hostPwIsEncrypted
-        null, // const char *GemServiceNrs
-        null, // const char *gemstoneUsername
-        null, // const char *gemstonePassword
-        0, // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
-        0, // int haltOnErrNum
-        error.ref() // GciErrSType *err
-    );
-    expect(session).toBe(0);
-    expect(error.number()).toBe(4051);
-    expect(error.category()).toBe(231169);
-    expect(error.context()).toBe(0);
-    expect(error.exception()).toBe(0);
-    expect(error.argCount()).toBe(0);
-    expect(error.fatal()).toBe(1);
-    expect(error.message()).toBe('gemstoneUsername is NULL or empty');
-    expect(error.reason()).toBe('');
-});
 
 test('GciTsCharToOop', () => {
     expect(gci.GciTsCharToOop("A".charCodeAt(0))).toBe(16668);
@@ -95,11 +77,12 @@ test('GciTsVersion', () => {
     const terminatingNullPos = theString.indexOf('\u0000');
     if (terminatingNullPos >= 0) {theString = theString.substr(0, terminatingNullPos);}
     expect(result).toBe(3);
-    expect(theString).toBe('3.5.0 build 64bit-46205');
+    expect(theString).toBe('3.5.2 build 2020-05-27T14:55:13-07:00 b982ec3e8e2bad08a35e015d947ac9210abc880e');
   });
 
 test('GciTsLogin', () => {
     const error = new GciErrSType();
+    const flag = Buffer.alloc(4);
     stoneNRS = '!tcp@localhost#server!' + login.stone;
     gemNRS = '!tcp@' + login.gem_host + '#netldi:' + login.netldi + '#task!gemnetobject';
     session = gci.GciTsLogin(
@@ -112,6 +95,7 @@ test('GciTsLogin', () => {
         login.gs_password, // const char *gemstonePassword
         0, // unsigned int loginFlags (per GCI_LOGIN* in gci.ht)
         0, // int haltOnErrNum
+        flag.ref(), // BoolType *executedSessionInit
         error.ref() // GciErrSType *err
     );
     expect(session === 0).toBe(false);
@@ -168,6 +152,7 @@ test('GciTsEncrypt', () => {
     expect(encryptedPassword == login.gs_password).toBe(false);
 
     let error = new GciErrSType();
+    const flag = Buffer.alloc(4);
     stoneNRS = '!tcp@localhost#server!' + login.stone;
     gemNRS = '!tcp@' + login.gem_host + '#netldi:' + login.netldi + '#task!gemnetobject';
     session = gci.GciTsLogin(
@@ -180,6 +165,7 @@ test('GciTsEncrypt', () => {
         login.gs_password, // const char *gemstonePassword
         1, // GCI_LOGIN_PW_ENCRYPTED
         0, // int haltOnErrNum
+        flag.ref(), // BoolType *executedSessionInit
         error.ref() // GciErrSType *err
     );
     expect(session).toBe(0);
@@ -195,6 +181,7 @@ test('GciTsEncrypt', () => {
         encryptedPassword, // const char *gemstonePassword
         1, // GCI_LOGIN_PW_ENCRYPTED
         0, // int haltOnErrNum
+        flag.ref(), // BoolType *executedSessionInit
         error.ref() // GciErrSType *err
     );
     expect(session === 0).toBe(false);

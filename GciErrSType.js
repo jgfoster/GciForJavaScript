@@ -13,4 +13,4 @@ class GciErrSType {       // gci.ht
     reason()    { return this.buffer.toString('utf8', 1138, 1025).split('\0').shift() }
 }
 
-module.exports = GciErrSType;
+exports.GciErrSType = GciErrSType;
